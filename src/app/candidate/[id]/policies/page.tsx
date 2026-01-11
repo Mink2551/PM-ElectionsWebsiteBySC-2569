@@ -158,6 +158,25 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
     }
   };
 
+  const handleCommentAdded = (policyId: string, commentId: string, newComment: any) => {
+    setCandidate((prev) => {
+      if (!prev?.policies?.[policyId]) return prev;
+      return {
+        ...prev,
+        policies: {
+          ...prev.policies,
+          [policyId]: {
+            ...prev.policies[policyId],
+            comments: {
+              ...(prev.policies[policyId].comments || {}),
+              [commentId]: newComment
+            }
+          }
+        }
+      };
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen transition-colors duration-300 flex items-center justify-center">
@@ -253,6 +272,7 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
           candidateId={candidateId}
           commentReactions={commentReactions}
           onCommentReaction={(commentId, type) => handleCommentReaction(activePolicyId, commentId, type)}
+          onCommentAdded={(commentId, comment) => handleCommentAdded(activePolicyId, commentId, comment)}
         />
       )}
 
@@ -343,7 +363,8 @@ function CommentSidebar({
   policy,
   candidateId,
   commentReactions,
-  onCommentReaction
+  onCommentReaction,
+  onCommentAdded
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -352,6 +373,7 @@ function CommentSidebar({
   candidateId: string;
   commentReactions: Record<string, 'like' | 'dislike'>;
   onCommentReaction: (commentId: string, type: 'like' | 'dislike') => Promise<string>;
+  onCommentAdded: (commentId: string, comment: any) => void;
 }) {
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -359,7 +381,7 @@ function CommentSidebar({
     policy.comments ? Object.entries(policy.comments).map(([id, data]) => ({ id, ...data })) : []
   );
 
-  // Sync local comments with prop when policy changes (optional, but good for switching between policies)
+  // Sync local comments with prop when policy changes
   useEffect(() => {
     setLocalComments(
       policy.comments ? Object.entries(policy.comments).map(([id, data]) => ({ id, ...data })) : []
@@ -385,7 +407,12 @@ function CommentSidebar({
         [`policies.${policyId}.comments.${commentId}`]: newComment,
       });
 
+      // Update parent state
+      onCommentAdded(commentId, newComment);
+
+      // Update local state immediately as well for redundancy/speed
       setLocalComments([...localComments, { id: commentId, ...newComment }]);
+
       setCommentText("");
     } catch (error) {
       console.error("Error adding comment:", error);

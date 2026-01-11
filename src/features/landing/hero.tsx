@@ -2,7 +2,7 @@
 
 import { useDeviceType } from "@/shared/hooks/checkDevice";
 import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 export default function Hero() {
@@ -10,18 +10,27 @@ export default function Hero() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch candidates from Firestore
+  const [liveUrl, setLiveUrl] = useState("");
+
+  // Fetch candidates and live settings
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch Candidates
         const snap = await getDocs(collection(db, "candidates"));
         const docs = snap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         setCandidates(docs);
+
+        // Fetch Live Settings
+        const settingsSnap = await getDoc(doc(db, "settings", "config"));
+        if (settingsSnap.exists()) {
+          setLiveUrl(settingsSnap.data().liveUrl || "");
+        }
       } catch (error) {
-        console.error("Error fetching candidates:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -50,6 +59,8 @@ export default function Hero() {
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* ================= HEADER ================= */}
         <div className="flex flex-col items-center text-center space-y-6 mb-16 animate-fadeInUp">
+
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-white/80">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
@@ -64,7 +75,7 @@ export default function Hero() {
               ${device === "ipad" && "text-5xl"}
               ${device === "laptop" && "text-6xl"}
               ${device === "pc" && "text-7xl"}
-            `}
+              `}
           >
             <span className="gradient-text">PM Student Council By SC</span>
             <br />
@@ -102,6 +113,27 @@ export default function Hero() {
           <StatBox value="500+" label="Voters" />
           <StatBox value="100%" label="Transparent" />
         </div>
+
+        {/* Live Stream Section */}
+        {liveUrl && (
+          <div className="w-full max-w-4xl mx-auto mb-8 animate-fadeInUp">
+            <div className="glass-card rounded-2xl overflow-hidden p-1 bg-gradient-to-tr from-red-600 to-pink-600 shadow-2xl shadow-red-500/20">
+              <div className="bg-black/40 backdrop-blur-sm px-4 py-2 flex items-center gap-2 text-white font-bold text-sm tracking-widest uppercase mb-[1px]">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                Live Now
+              </div>
+              <div className="relative pt-[56.25%] bg-black">
+                {/* Facebook Embed */}
+                <iframe
+                  src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(liveUrl)}&show_text=false&t=0`}
+                  className="absolute top-0 left-0 w-full h-full border-none"
+                  allowFullScreen={true}
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ================= CANDIDATES SECTION ================= */}
         <div id="candidates" className="space-y-8 scroll-mt-24">
@@ -170,9 +202,9 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
       <div className="relative">
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[3px]">
           <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
-            {data.photoURL ? (
+            {data.imageUrl || data.photoURL ? (
               <img
-                src={data.photoURL}
+                src={data.imageUrl || data.photoURL}
                 alt={data.firstname}
                 className="w-full h-full object-cover"
               />

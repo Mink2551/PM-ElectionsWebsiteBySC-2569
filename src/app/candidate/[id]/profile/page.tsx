@@ -13,6 +13,7 @@ interface Candidate {
   nickname?: string;
   class?: string;
   votes: number;
+  imageUrl?: string;
   photoURL?: string;
   bio?: string;
   policies?: Record<string, any>;
@@ -90,9 +91,9 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
               <div className="relative">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[4px] animate-pulseGlow">
                   <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
-                    {candidate.photoURL ? (
+                    {candidate.imageUrl || candidate.photoURL ? (
                       <img
-                        src={candidate.photoURL}
+                        src={candidate.imageUrl || candidate.photoURL}
                         alt={candidate.firstname}
                         className="w-full h-full object-cover"
                       />

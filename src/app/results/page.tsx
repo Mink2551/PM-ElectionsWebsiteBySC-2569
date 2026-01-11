@@ -14,6 +14,7 @@ interface Candidate {
     class?: string;
     votes: number;
     photoURL?: string;
+    imageUrl?: string; // Added new field
 }
 
 export default function ResultsPage() {
@@ -140,8 +141,12 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
                 {/* Avatar */}
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
                     <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center overflow-hidden">
-                        {candidate.photoURL ? (
-                            <img src={candidate.photoURL} alt={candidate.firstname} className="w-full h-full object-cover" />
+                        {candidate.imageUrl || candidate.photoURL ? (
+                            <img
+                                src={candidate.imageUrl || candidate.photoURL}
+                                alt={candidate.firstname}
+                                className="w-full h-full object-cover"
+                            />
                         ) : (
                             <span className="text-xl font-bold gradient-text">{candidate.firstname?.[0]}</span>
                         )}

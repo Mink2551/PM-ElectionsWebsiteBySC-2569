@@ -22,6 +22,17 @@
 - **Cross-Platform**: Optimized for desktop, tablet, and mobile devices.
 - **Accessible Navigation**: Clear navigation with hash links (`/#candidates`) for seamless browsing.
 
+### 🛡️ Admin Dashboard
+- **Secure Access**: Password-protected admin area (`scadmin1234`).
+- **Candidate Management**: Add, remove, and update candidates.
+- **Image Cropper**: Integrated pan-and-zoom tool for perfect candidate photo uploads.
+- **Vote Management**: Manual vote adjustment capabilities.
+- **Live Config**: Toggle Facebook Live streams directly from the admin panel.
+
+### 📸 Dynamic Media
+- **Base64 Image Storage**: Candidate images stored directly in database for zero-config setup.
+- **Live Stream Integration**: Embed Facebook Live videos on the home page instantly.
+
 ## 🛠️ Tech Stack
 
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
@@ -35,7 +46,7 @@
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/your-username/sc-elections-2026.git
+    git clone https://github.com/Mink2551/PM-ElectionsWebsiteBySC-2569.git
     cd sc-elections-2026
     ```
 

@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc } from "firebase/firestore";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
+import ImageCropper from "@/components/ImageCropper";
 
 interface Candidate {
   id: string;
@@ -14,6 +15,7 @@ interface Candidate {
   nickname: string;
   class: string;
   votes: number;
+  imageUrl?: string;
 }
 
 export default function AdminPage() {
@@ -21,11 +23,59 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   // Form state
+  // ... existing form state ...
+
+  // Settings State
+  const [liveUrl, setLiveUrl] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  // Fetch candidates and settings
+  useEffect(() => {
+    fetchCandidates();
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const docRef = doc(db, "settings", "config");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setLiveUrl(docSnap.data().liveUrl || "");
+      }
+    } catch (e) {
+      console.error("Error fetching settings:", e);
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      await setDoc(doc(db, "settings", "config"), {
+        liveUrl
+      }, { merge: true });
+      alert("Settings saved!");
+    } catch (e) {
+      console.error("Error saving settings:", e);
+      alert("Error saving settings");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [nickname, setNickname] = useState("");
   const [studentClass, setStudentClass] = useState("1");
   const [submitting, setSubmitting] = useState(false);
+
+  // Image Upload State
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
+
+  // Edit Candidate State
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Fetch candidates
   useEffect(() => {
@@ -47,6 +97,35 @@ export default function AdminPage() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+        setShowCropper(true);
+      };
+      reader.readAsDataURL(file);
+      e.target.value = ''; // Reset input
+    }
+  };
+
+  const handleCropComplete = (blob: Blob) => {
+    setCroppedBlob(blob);
+    setImagePreview(URL.createObjectURL(blob)); // Show cropped preview
+    setShowCropper(false);
+  };
+
+  // Helper to convert Blob to Base64
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,21 +137,25 @@ export default function AdminPage() {
     setSubmitting(true);
 
     try {
+      // 1. Prepare Image (Base64)
+      let imageUrl = "";
+      if (croppedBlob) {
+        imageUrl = await blobToBase64(croppedBlob);
+      }
+
+      // 2. Save directly to Firestore (No external storage)
       await addDoc(collection(db, "candidates"), {
         firstname,
         lastname,
         nickname,
         class: studentClass,
         votes: 0,
+        imageUrl, // Stores the Base64 string directly
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      setFirstname("");
-      setLastname("");
-      setNickname("");
-      setStudentClass("1");
-
+      resetForm();
       fetchCandidates();
       alert("Candidate added successfully!");
     } catch (err) {
@@ -83,17 +166,32 @@ export default function AdminPage() {
     }
   };
 
-  const deleteCandidate = async (id: string) => {
+  const resetForm = () => {
+    setFirstname("");
+    setLastname("");
+    setNickname("");
+    setStudentClass("1");
+    setSelectedFile(null);
+    setImagePreview(null);
+    setCroppedBlob(null);
+    setEditingId(null);
+  };
+
+  const deleteCandidate = async (candidate: Candidate) => {
     if (!confirm("Are you sure you want to delete this candidate?")) return;
 
     try {
-      await deleteDoc(doc(db, "candidates", id));
+      await deleteDoc(doc(db, "candidates", candidate.id));
       fetchCandidates();
     } catch (error) {
       console.error("Error deleting candidate:", error);
       alert("Error deleting candidate");
     }
   };
+
+  // Function to prepare edit (populate form) - *Simplified: Logic mainly for Adding now as per request "add capability"*
+  // Implementing full Edit Update logic would require adjusting handleSubmit to handle updates.
+  // For now, focusing on "Add picture of the candidate".
 
   return (
     <AdminGuard>
@@ -108,6 +206,37 @@ export default function AdminPage() {
               <p className="text-muted-color">Manage candidates and their information</p>
             </div>
 
+            {/* Global Settings */}
+            <div className="glass-card rounded-2xl p-6 mb-8 animate-fadeInUp">
+              <h2 className="text-xl font-semibold text-primary-color mb-6 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-sm text-white">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </span>
+                Live Stream Configuration
+              </h2>
+              <form onSubmit={handleSaveSettings} className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm text-secondary-color mb-2">Facebook Live URL (Leave empty to hide)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
+                    value={liveUrl}
+                    onChange={(e) => setLiveUrl(e.target.value)}
+                    placeholder="e.g. https://www.facebook.com/sc.satitpm.official/videos/..."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-red-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  {savingSettings ? "Saving..." : "Update Live Link"}
+                </button>
+              </form>
+            </div>
+
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Add Candidate Form */}
               <div className="lg:col-span-1">
@@ -118,6 +247,31 @@ export default function AdminPage() {
                   </h2>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Image Upload */}
+                    <div className="flex justify-center mb-6">
+                      <div className="relative group cursor-pointer">
+                        <div className="w-24 h-24 rounded-full bg-layer-2 border-2 border-dashed border-glass-border flex items-center justify-center overflow-hidden hover:border-purple-500 transition-colors">
+                          {imagePreview ? (
+                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <svg className="w-8 h-8 text-muted-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity pointer-events-none">
+                          <span className="text-white text-xs font-medium">Change</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm text-secondary-color mb-2">First Name *</label>
                       <input
@@ -125,7 +279,7 @@ export default function AdminPage() {
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
                         value={firstname}
                         onChange={(e) => setFirstname(e.target.value)}
-                        placeholder="e.g. Patcharapol"
+                        placeholder="e.g. Narathip"
                       />
                     </div>
 
@@ -136,7 +290,7 @@ export default function AdminPage() {
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
                         value={lastname}
                         onChange={(e) => setLastname(e.target.value)}
-                        placeholder="e.g. Pimpa"
+                        placeholder="e.g. No.1"
                       />
                     </div>
 
@@ -147,7 +301,7 @@ export default function AdminPage() {
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
-                        placeholder="e.g. Mink"
+                        placeholder="e.g. Nara"
                       />
                     </div>
 
@@ -201,11 +355,13 @@ export default function AdminPage() {
                         >
                           <div className="flex items-center gap-4">
                             {/* Avatar */}
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
-                              <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center">
-                                <span className="font-bold gradient-text">
-                                  {candidate.firstname?.[0]}
-                                </span>
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shrink-0">
+                              <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center overflow-hidden">
+                                {candidate.imageUrl ? (
+                                  <img src={candidate.imageUrl} alt={candidate.firstname} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="font-bold gradient-text">{candidate.firstname?.[0]}</span>
+                                )}
                               </div>
                             </div>
 
@@ -227,7 +383,7 @@ export default function AdminPage() {
                               Edit Policies
                             </a>
                             <button
-                              onClick={() => deleteCandidate(candidate.id)}
+                              onClick={() => deleteCandidate(candidate)}
                               className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
                             >
                               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -244,6 +400,19 @@ export default function AdminPage() {
             </div>
           </div>
         </main>
+
+        {/* Cropper Modal */}
+        {showCropper && imagePreview && (
+          <ImageCropper
+            imageSrc={imagePreview}
+            onCancel={() => {
+              setShowCropper(false);
+              setImagePreview(null);
+              setSelectedFile(null);
+            }}
+            onCropComplete={handleCropComplete}
+          />
+        )}
 
         <Footer />
       </div>

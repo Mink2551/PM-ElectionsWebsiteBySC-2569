@@ -22,7 +22,7 @@ export default function MobileMenu({
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 bg-glass-bg backdrop-blur-xl border-r border-glass-border z-50
+          fixed top-0 left-0 h-full w-64 bg-[#12121a] shadow-2xl border-r border-glass-border z-50
           transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
