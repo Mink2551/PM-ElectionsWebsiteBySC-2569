@@ -81,7 +81,9 @@ const translations = {
         "sidebar.placeholder": "Share your thoughts...",
         "sidebar.submitting": "Submitting...",
         "btn.back_home": "Back to Home",
-        "btn.view_all_policies": "View all"
+        "btn.view_all_policies": "View all",
+        "theme.light": "Light Mode",
+        "theme.dark": "Dark Mode"
     },
     th: {
         "nav.home": "หน้าแรก",
@@ -152,19 +154,24 @@ const translations = {
         "sidebar.placeholder": "แบ่งปันความคิดเห็นของคุณ...",
         "sidebar.submitting": "กำลังส่ง...",
         "btn.back_home": "กลับไปหน้าแรก",
-        "btn.view_all_policies": "ดูทั้งหมด"
+        "btn.view_all_policies": "ดูทั้งหมด",
+        "theme.light": "โหมดสว่าง",
+        "theme.dark": "โหมดมืด"
     }
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguageState] = useState<Language>("en");
+    const [language, setLanguageState] = useState<Language>("th");
 
     useEffect(() => {
         const savedLang = Cookies.get("language") as Language;
         if (savedLang && (savedLang === "en" || savedLang === "th")) {
             setLanguageState(savedLang);
+        } else {
+            // Default to th if no cookie
+            setLanguageState("th");
         }
     }, []);
 
