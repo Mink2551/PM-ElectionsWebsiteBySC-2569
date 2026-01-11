@@ -6,6 +6,7 @@ import { collection, getDocs, doc, updateDoc, increment } from "firebase/firesto
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 interface Candidate {
     id: string;
@@ -17,6 +18,7 @@ interface Candidate {
 
 export default function VotesAdminPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
 
@@ -84,11 +86,11 @@ export default function VotesAdminPage() {
                         {/* Header */}
                         <div className="mb-8 animate-fadeInUp flex items-center justify-between">
                             <div>
-                                <h1 className="text-3xl font-bold gradient-text mb-2">Vote Management</h1>
-                                <p className="text-muted-color">Manually adjust candidate vote counts</p>
+                                <h1 className="text-3xl font-bold gradient-text mb-2">{t("admin.votes_title")}</h1>
+                                <p className="text-muted-color">{t("admin.votes_desc")}</p>
                             </div>
                             <a href="/admin" className="text-secondary-color hover:text-primary-color transition-colors">
-                                ← Back to Dashboard
+                                ← {t("common.back")}
                             </a>
                         </div>
 
@@ -119,7 +121,7 @@ export default function VotesAdminPage() {
                                         <div className="flex flex-col md:flex-row items-center gap-4">
                                             <div className="text-center md:text-right mr-4">
                                                 <span className="text-2xl font-bold text-primary-color block">{candidate.votes || 0}</span>
-                                                <span className="text-xs text-muted-color uppercase tracking-wider">Current Votes</span>
+                                                <span className="text-xs text-muted-color uppercase tracking-wider">{t("admin.current_votes")}</span>
                                             </div>
 
                                             <div className="flex items-center gap-2 bg-layer-1 rounded-lg p-1 border border-glass-border">

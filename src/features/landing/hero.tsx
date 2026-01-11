@@ -4,11 +4,13 @@ import { useDeviceType } from "@/shared/hooks/checkDevice";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 export default function Hero() {
   const device = useDeviceType();
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   const [liveUrl, setLiveUrl] = useState("");
 
@@ -64,7 +66,7 @@ export default function Hero() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-white/80">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            Official Election Platform
+            {t("hero.badge")}
           </div>
 
           {/* Main Title */}
@@ -77,17 +79,14 @@ export default function Hero() {
               ${device === "pc" && "text-7xl"}
               `}
           >
-            <span className="gradient-text">PM Student Council By SC</span>
+            <span className="gradient-text">{t("hero.title1")}</span>
             <br />
-            <span className="text-white">2569</span>
+            <span className="text-white">{t("hero.title2")}</span>
           </h1>
 
           {/* Description */}
           <p className="text-white/60 max-w-2xl text-base md:text-lg leading-relaxed">
-            Official student council election platform with{" "}
-            <span className="text-white font-medium">transparency</span>,{" "}
-            <span className="text-white font-medium">fairness</span>, and{" "}
-            <span className="text-white font-medium">real-time monitoring</span>.
+            {t("hero.desc")}
           </p>
 
           {/* CTA Buttons */}
@@ -96,22 +95,22 @@ export default function Hero() {
               href="#candidates"
               className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-1"
             >
-              View Candidates
+              {t("hero.cta.view")}
             </a>
             <a
               href="/results"
               className="px-8 py-3 rounded-xl border border-white/20 text-white font-semibold hover:bg-white/10 transition-all duration-300"
             >
-              Live Results
+              {t("hero.cta.results")}
             </a>
           </div>
         </div>
 
         {/* ================= STATS BAR ================= */}
         <div className="flex justify-center gap-8 md:gap-16 mb-16">
-          <StatBox value={candidates.length} label="Candidates" />
-          <StatBox value="500+" label="Voters" />
-          <StatBox value="100%" label="Transparent" />
+          <StatBox value={candidates.length} label={t("stats.candidates")} />
+          <StatBox value="500+" label={t("stats.voters")} />
+          <StatBox value="100%" label={t("stats.transparent")} />
         </div>
 
         {/* Live Stream Section */}
@@ -120,7 +119,7 @@ export default function Hero() {
             <div className="glass-card rounded-2xl overflow-hidden p-1 bg-gradient-to-tr from-red-600 to-pink-600 shadow-2xl shadow-red-500/20">
               <div className="bg-black/40 backdrop-blur-sm px-4 py-2 flex items-center gap-2 text-white font-bold text-sm tracking-widest uppercase mb-[1px]">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                Live Now
+                {t("live.badge")}
               </div>
               <div className="relative pt-[56.25%] bg-black">
                 {/* Facebook Embed */}
@@ -140,10 +139,10 @@ export default function Hero() {
           {/* Section Header */}
           <div className="flex flex-col items-center text-center space-y-2">
             <h2 className="text-2xl md:text-3xl font-bold text-white">
-              Meet the Candidates
+              {t("section.candidates.title")}
             </h2>
             <p className="text-white/50 text-sm">
-              Click on a candidate to view their policies and profile
+              {t("section.candidates.desc")}
             </p>
           </div>
 
@@ -162,8 +161,8 @@ export default function Hero() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <p className="text-white/50 text-lg">No candidates registered yet</p>
-              <p className="text-white/30 text-sm mt-1">Check back soon!</p>
+              <p className="text-white/50 text-lg">{t("no_candidates")}</p>
+              <p className="text-white/30 text-sm mt-1">{t("check_back")}</p>
             </div>
           )}
 
@@ -193,6 +192,7 @@ function StatBox({ value, label }: { value: number | string; label: string }) {
 
 /* ================= CANDIDATE CARD ================= */
 function CandidateCard({ data, index }: { data: any; index: number }) {
+  const { t } = useLanguage();
   return (
     <div
       className="glass-card rounded-2xl p-6 flex flex-col items-center text-center space-y-5 card-hover animate-fadeInUp"
@@ -239,14 +239,14 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
           href={`/candidate/${data.id}/policies`}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-medium text-sm hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-0.5 text-center"
         >
-          View Policies
+          {t("card.view_policies")}
         </a>
 
         <a
           href={`/candidate/${data.id}/profile`}
           className="w-full py-3 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 hover:text-white transition-all duration-300 text-center"
         >
-          Personal Profile
+          {t("card.personal_profile")}
         </a>
       </div>
     </div>

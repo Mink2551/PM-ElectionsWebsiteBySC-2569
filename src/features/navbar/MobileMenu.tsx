@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import NavLinks from "./NavLinks";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 export default function MobileMenu({
   open,
@@ -8,6 +9,7 @@ export default function MobileMenu({
   open: boolean;
   onClose: () => void;
 }) {
+  const { language, setLanguage, t } = useLanguage();
   return (
     <>
       {/* Overlay */}
@@ -28,10 +30,22 @@ export default function MobileMenu({
         `}
       >
         <div className="flex items-center justify-between p-4 border-b border-glass-border">
-          <h2 className="font-semibold text-primary-color">PM's Election 2569</h2>
-          <button onClick={onClose} className="text-secondary-color hover:text-primary-color transition-colors">
-            <CloseIcon />
-          </button>
+          <div className="flex flex-col">
+            <h2 className="font-semibold text-primary-color leading-tight">{t("hero.title2")}</h2>
+            <p className="text-[10px] text-muted-color capitalize">{t("hero.title1")}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLanguage(language === "en" ? "th" : "en")}
+              className="flex items-center justify-center w-8 h-8 rounded-lg glass text-[10px] font-bold text-white border border-white/10"
+            >
+              {language === "en" ? "TH" : "EN"}
+            </button>
+            <button onClick={onClose} className="text-secondary-color hover:text-primary-color transition-colors">
+              <CloseIcon />
+            </button>
+          </div>
         </div>
 
         <ul className="flex flex-col gap-4 p-4">

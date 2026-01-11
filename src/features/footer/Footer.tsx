@@ -1,10 +1,12 @@
 "use client";
 
 import { useDeviceType } from "@/shared/hooks/checkDevice";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 export default function Footer() {
   const device = useDeviceType();
   const isMobile = device === "phone";
+  const { t } = useLanguage();
 
   return (
     <footer className="relative w-full mt-20 overflow-hidden">
@@ -28,36 +30,36 @@ export default function Footer() {
               </div>
               <div>
                 <h3 className="font-bold text-lg text-primary-color">
-                  Election 2569
+                  {t("hero.title2")}
                 </h3>
-                <p className="text-xs text-muted-color">Student Council</p>
+                <p className="text-xs text-muted-color">{t("hero.title1")}</p>
               </div>
             </div>
             <p className="text-sm text-muted-color max-w-xs mx-auto md:mx-0">
-              Official platform for transparent and fair student council elections with real-time monitoring.
+              {t("hero.desc")}
             </p>
           </div>
 
           {/* ================= QUICK LINKS ================= */}
           <div className={isMobile ? "" : "pl-8"}>
-            <h4 className="font-semibold text-primary-color mb-4">Quick Links</h4>
+            <h4 className="font-semibold text-primary-color mb-4">{t("nav.home")}</h4>
             <ul className="space-y-3 text-sm">
-              <FooterLink href="/">Home</FooterLink>
-              <FooterLink href="#candidates">Candidates</FooterLink>
-              <FooterLink href="/results">Results</FooterLink>
+              <FooterLink href="/">{t("nav.home")}</FooterLink>
+              <FooterLink href="#candidates">{t("nav.candidates")}</FooterLink>
+              <FooterLink href="/results">{t("nav.results")}</FooterLink>
             </ul>
           </div>
 
           {/* ================= ELECTION INFO ================= */}
           <div>
-            <h4 className="font-semibold text-primary-color mb-4">Election Info</h4>
+            <h4 className="font-semibold text-primary-color mb-4">{t("footer.election_info")}</h4>
             <div className="space-y-3 text-sm text-muted-color">
               <p className="flex items-center gap-2 justify-center md:justify-start">
                 <span className="w-2 h-2 rounded-full bg-green-500" />
-                Voting opens soon
+                {t("footer.voting_soon")}
               </p>
-              <p>All votes are recorded in real-time and cannot be modified.</p>
-              <p>Results will be announced immediately after voting closes.</p>
+              <p>{t("footer.realtime_note")}</p>
+              <p>{t("footer.announce_note")}</p>
             </div>
           </div>
         </div>
@@ -67,7 +69,7 @@ export default function Footer() {
       <div className="bg-white/5 dark:bg-black/20 py-6 border-t border-glass-border">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-color">
-            © 2026 PM Student Council. All rights reserved.
+            © 2026 {t("hero.title1")}. {t("footer.rights")}
           </p>
 
           {/* Social Links */}

@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 interface Candidate {
   id: string;
@@ -21,6 +22,7 @@ interface Candidate {
 
 export default function CandidateProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: candidateId } = React.use(params);
+  const { t } = useLanguage();
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,9 +59,9 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
         <Navbar />
         <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh]">
           <div className="glass-card rounded-2xl p-12 text-center">
-            <p className="text-white/50 text-xl">Candidate not found</p>
+            <p className="text-white/50 text-xl">{t("profile.not_found")}</p>
             <a href="/" className="mt-4 inline-block text-purple-400 hover:text-purple-300">
-              ← Back to Home
+              ← {t("btn.back_home")}
             </a>
           </div>
         </div>
@@ -81,7 +83,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Candidates
+            {t("profile.back")}
           </a>
 
           {/* Profile Card */}
@@ -107,7 +109,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
 
                 {/* Status Badge */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-xs font-medium text-white">
-                  Candidate
+                  {t("profile.candidate")}
                 </div>
               </div>
             </div>
@@ -127,22 +129,22 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="text-center p-4 rounded-xl bg-layer-1">
                 <p className="text-2xl font-bold gradient-text">{candidate.votes || 0}</p>
-                <p className="text-muted-color text-sm">Votes</p>
+                <p className="text-muted-color text-sm">{t("profile.votes")}</p>
               </div>
               <div className="text-center p-4 rounded-xl bg-layer-1">
                 <p className="text-2xl font-bold gradient-text">{policyCount}</p>
-                <p className="text-muted-color text-sm">Policies</p>
+                <p className="text-muted-color text-sm">{t("profile.policies")}</p>
               </div>
               <div className="text-center p-4 rounded-xl bg-layer-1">
                 <p className="text-2xl font-bold gradient-text">#{candidate.class}</p>
-                <p className="text-muted-color text-sm">Class</p>
+                <p className="text-muted-color text-sm">{t("profile.class")}</p>
               </div>
             </div>
 
             {/* Bio */}
             {candidate.bio && (
               <div className="mb-8">
-                <h2 className="text-lg font-semibold text-primary-color mb-3">About</h2>
+                <h2 className="text-lg font-semibold text-primary-color mb-3">{t("profile.about")}</h2>
                 <p className="text-secondary-color leading-relaxed">{candidate.bio}</p>
               </div>
             )}
@@ -153,13 +155,13 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                 href={`/candidate/${candidate.id}/policies`}
                 className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold text-center hover:shadow-lg hover:shadow-purple-500/30 transition-all hover:-translate-y-0.5"
               >
-                View Policies
+                {t("card.view_policies")}
               </a>
               <a
                 href="/results"
                 className="flex-1 py-3 rounded-xl border border-glass-border text-primary-color font-semibold text-center hover:bg-layer-1 transition-all"
               >
-                See Live Results
+                {t("results.live")}
               </a>
             </div>
           </div>
@@ -169,7 +171,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
             <div className="mt-8 animate-fadeInUp" style={{ animationDelay: "100ms" }}>
               <h2 className="text-xl font-semibold text-primary-color mb-4 flex items-center gap-2">
                 <span className="w-1 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500"></span>
-                Policies Overview
+                {t("profile.policies_overview")}
               </h2>
 
               <div className="space-y-3">
@@ -186,7 +188,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                   href={`/candidate/${candidate.id}/policies`}
                   className="block mt-4 text-center text-purple-400 hover:text-purple-300 text-sm"
                 >
-                  View all {policyCount} policies →
+                  {t("btn.view_all_policies")} {policyCount} {t("profile.policies")} →
                 </a>
               )}
             </div>

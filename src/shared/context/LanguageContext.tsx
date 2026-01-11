@@ -1,0 +1,193 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
+
+type Language = "en" | "th";
+
+interface LanguageContextType {
+    language: Language;
+    setLanguage: (lang: Language) => void;
+    t: (key: string) => string;
+}
+
+const translations = {
+    en: {
+        "nav.home": "Home",
+        "nav.candidates": "Candidates",
+        "nav.results": "Live Results",
+        "hero.badge": "Official Election Platform",
+        "hero.title1": "PM Student Council By SC",
+        "hero.title2": "2569",
+        "hero.desc": "Official student council election platform with transparency, fairness, and real-time monitoring.",
+        "hero.cta.view": "View Candidates",
+        "hero.cta.results": "Live Results",
+        "live.badge": "Live Now",
+        "stats.candidates": "Candidates",
+        "stats.voters": "Voters",
+        "stats.transparent": "Transparent",
+        "admin.title": "Admin Dashboard",
+        "admin.desc": "Manage candidates and their information",
+        "admin.live_config": "Live Stream Configuration",
+        "admin.facebook_label": "Facebook Live URL (Leave empty to hide)",
+        "admin.update_link": "Update Live Link",
+        "admin.add_candidate": "Add Candidate",
+        "admin.firstname": "First Name",
+        "admin.lastname": "Last Name",
+        "admin.nickname": "Nickname",
+        "admin.class": "Class",
+        "admin.saving": "Saving...",
+        "admin.adding": "Adding...",
+        "admin.votes_title": "Vote Management",
+        "admin.votes_desc": "Manually adjust candidate vote counts",
+        "admin.current_votes": "Current Votes",
+        "section.candidates.title": "Meet the Candidates",
+        "section.candidates.desc": "Click on a candidate to view their policies and profile",
+        "card.view_policies": "View Policies",
+        "card.personal_profile": "Personal Profile",
+        "results.title": "Live Election Results",
+        "results.updates": "Live Updates",
+        "results.desc": "Real-time vote tracking for PM Student Council 2569",
+        "results.total": "Total Votes",
+        "results.last_updated": "Last Updated",
+        "results.live": "Live",
+        "results.votes": "votes",
+        "no_candidates": "No candidates registered yet",
+        "check_back": "Check back soon!",
+        "footer.rights": "All rights reserved.",
+        "footer.made_by": "Made with ❤️ by Student Council",
+        "footer.election_info": "Election Info",
+        "footer.voting_soon": "Voting opens soon",
+        "footer.realtime_note": "All votes are recorded in real-time and cannot be modified.",
+        "footer.announce_note": "Results will be announced immediately after voting closes.",
+        "common.back": "Back",
+        "profile.back": "Back to Candidates",
+        "profile.candidate": "Candidate",
+        "profile.votes": "Votes",
+        "profile.policies": "Policies",
+        "profile.class": "Class",
+        "profile.about": "About",
+        "profile.policies_overview": "Policies Overview",
+        "profile.not_found": "Candidate not found",
+        "policies.back": "Back to Profile",
+        "policies.title": "Policies & Visions",
+        "policies.proposed": "proposed",
+        "policies.none": "No policies published yet",
+        "policies.check_later": "Check back later for updates",
+        "sidebar.comments": "Comments",
+        "sidebar.discussing": "Discussing Policy:",
+        "sidebar.no_comments": "No comments yet",
+        "sidebar.start_conversation": "Start the conversation!",
+        "sidebar.placeholder": "Share your thoughts...",
+        "sidebar.submitting": "Submitting...",
+        "btn.back_home": "Back to Home",
+        "btn.view_all_policies": "View all"
+    },
+    th: {
+        "nav.home": "หน้าแรก",
+        "nav.candidates": "ผู้สมัคร",
+        "nav.results": "ผลคะแนนสด",
+        "hero.badge": "แพลตฟอร์มการเลือกตั้งอย่างเป็นทางการ",
+        "hero.title1": "สภานักเรียน PM โดย SC",
+        "hero.title2": "2569",
+        "hero.desc": "แพลตฟอร์มการเลือกตั้งสภานักเรียนอย่างเป็นทางการ ด้วยความโปร่งใส ยุติธรรม และการติดตามผลแบบเรียลไทม์",
+        "hero.cta.view": "ดูผู้สมัคร",
+        "hero.cta.results": "ผลคะแนนสด",
+        "live.badge": "กำลังถ่ายทอดสด",
+        "stats.candidates": "ผู้สมัคร",
+        "stats.voters": "ผู้ลงคะแนน",
+        "stats.transparent": "โปร่งใส",
+        "admin.title": "แผงควบคุมผู้ดูแลระบบ",
+        "admin.desc": "จัดการข้อมูลผู้สมัครและรายละเอียดต่างๆ",
+        "admin.live_config": "การตั้งค่าถ่ายทอดสด",
+        "admin.facebook_label": "URL ของ Facebook Live (ปล่อยว่างเพื่อซ่อน)",
+        "admin.update_link": "อัปเดตลิงก์สด",
+        "admin.add_candidate": "เพิ่มผู้สมัคร",
+        "admin.firstname": "ชื่อ",
+        "admin.lastname": "นามสกุล",
+        "admin.nickname": "ชื่อเล่น",
+        "admin.class": "ชั้นเรียน",
+        "admin.saving": "กำลังอัปเดต...",
+        "admin.adding": "กำลังเพิ่ม...",
+        "admin.votes_title": "การจัดการคะแนนโหวต",
+        "admin.votes_desc": "ปรับแต่งคะแนนโหวตของผู้สมัครด้วยตนเอง",
+        "admin.current_votes": "คะแนนปัจจุบัน",
+        "section.candidates.title": "ทำความรู้จักผู้สมัคร",
+        "section.candidates.desc": "คลิกที่ชื่อผู้สมัครเพื่อดูนโยบายและประวัติ",
+        "card.view_policies": "ดูนโยบาย",
+        "card.personal_profile": "ประวัติส่วนตัว",
+        "results.title": "ผลการเลือกตั้งสด",
+        "results.updates": "อัปเดตสด",
+        "results.desc": "การติดตามคะแนนแบบเรียลไทม์สำหรับการเลือกตั้งสภานักเรียน PM 2569",
+        "results.total": "คะแนนรวมทั้งหมด",
+        "results.last_updated": "อัปเดตล่าสุด",
+        "results.live": "สด",
+        "results.votes": "คะแนน",
+        "no_candidates": "ยังไม่มีผู้สมัครลงทะเบียน",
+        "check_back": "โปรดติดตามเร็วๆ นี้!",
+        "footer.rights": "สงวนลิขสิทธิ์ทั้งหมด",
+        "footer.made_by": "สร้างด้วย ❤️ โดยสภานักเรียน",
+        "footer.election_info": "ข้อมูลการเลือกตั้ง",
+        "footer.voting_soon": "การลงคะแนนจะเปิดเร็วๆ นี้",
+        "footer.realtime_note": "คะแนนทั้งหมดถูกบันทึกแบบเรียลไทม์และไม่สามารถแก้ไขได้",
+        "footer.announce_note": "ผลการเลือกตั้งจะประกาศทันทีหลังปิดการลงคะแนน",
+        "common.back": "ย้อนกลับ",
+        "profile.back": "กลับไปหน้าผู้สมัคร",
+        "profile.candidate": "ผู้สมัคร",
+        "profile.votes": "คะแนน",
+        "profile.policies": "นโยบาย",
+        "profile.class": "ชั้นเรียน",
+        "profile.about": "เกี่ยวกับ",
+        "profile.policies_overview": "ภาพรวมนโยบาย",
+        "profile.not_found": "ไม่พบข้อมูลผู้สมัคร",
+        "policies.back": "กลับไปหน้าประวัติ",
+        "policies.title": "นโยบายและวิสัยทัศน์",
+        "policies.proposed": "ข้อเสนอ",
+        "policies.none": "ยังไม่มีการเผยแพร่นโยบาย",
+        "policies.check_later": "โปรดกลับมาตรวจสอบอีกครั้งภายหลัง",
+        "sidebar.comments": "ความคิดเห็น",
+        "sidebar.discussing": "กำลังพูดคุยนโยบาย:",
+        "sidebar.no_comments": "ยังไม่มีความคิดเห็น",
+        "sidebar.start_conversation": "เริ่มการสนทนาได้เลย!",
+        "sidebar.placeholder": "แบ่งปันความคิดเห็นของคุณ...",
+        "sidebar.submitting": "กำลังส่ง...",
+        "btn.back_home": "กลับไปหน้าแรก",
+        "btn.view_all_policies": "ดูทั้งหมด"
+    }
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+    const [language, setLanguageState] = useState<Language>("en");
+
+    useEffect(() => {
+        const savedLang = Cookies.get("language") as Language;
+        if (savedLang && (savedLang === "en" || savedLang === "th")) {
+            setLanguageState(savedLang);
+        }
+    }, []);
+
+    const setLanguage = (lang: Language) => {
+        setLanguageState(lang);
+        Cookies.set("language", lang, { expires: 365 });
+    };
+
+    const t = (key: string) => {
+        return translations[language][key as keyof typeof translations["en"]] || key;
+    };
+
+    return (
+        <LanguageContext.Provider value={{ language, setLanguage, t }}>
+            {children}
+        </LanguageContext.Provider>
+    );
+}
+
+export function useLanguage() {
+    const context = useContext(LanguageContext);
+    if (context === undefined) {
+        throw new Error("useLanguage must be used within a LanguageProvider");
+    }
+    return context;
+}

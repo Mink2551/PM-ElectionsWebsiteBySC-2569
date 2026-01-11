@@ -5,9 +5,11 @@ import { useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import MobileMenu from "./MobileMenu";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <>
@@ -24,10 +26,10 @@ export default function Navbar() {
               {/* Logo Text */}
               <div className="hidden sm:block">
                 <h1 className="font-bold text-lg gradient-text">
-                  Election 2569
+                  {t("hero.title2")}
                 </h1>
                 <p className="text-xs text-muted-color -mt-1">
-                  Student Council
+                  {t("hero.title1")}
                 </p>
               </div>
             </a>
@@ -35,9 +37,9 @@ export default function Navbar() {
 
           {/* CENTER - Navigation (Desktop) */}
           <ul className="hidden md:flex gap-1 items-center">
-            <NavLink href="/">Home</NavLink>
-            <NavLink href="/#candidates">Candidates</NavLink>
-            <NavLink href="/results">Live Results</NavLink>
+            <NavLink href="/">{t("nav.home")}</NavLink>
+            <NavLink href="/#candidates">{t("nav.candidates")}</NavLink>
+            <NavLink href="/results">{t("nav.results")}</NavLink>
           </ul>
 
           {/* RIGHT - CTA Button & Mobile Menu */}
@@ -47,8 +49,17 @@ export default function Navbar() {
               className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 text-white font-medium text-sm hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5"
             >
               <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-              Live Results
+              {t("nav.results")}
             </a>
+
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLanguage(language === "en" ? "th" : "en")}
+              className="flex items-center justify-center w-10 h-10 rounded-xl glass hover:bg-layer-1 transition-all duration-300 text-sm font-bold text-white border border-white/10"
+              title={language === "en" ? "Switch to Thai" : "เปลี่ยนเป็นภาษาอังกฤษ"}
+            >
+              {language === "en" ? "TH" : "EN"}
+            </button>
 
             {/* Mobile Menu Button - RIGHT SIDE */}
             <button

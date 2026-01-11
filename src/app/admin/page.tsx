@@ -7,6 +7,7 @@ import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
 import ImageCropper from "@/components/ImageCropper";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 interface Candidate {
   id: string;
@@ -20,6 +21,7 @@ interface Candidate {
 
 export default function AdminPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
 
   // Form state
@@ -202,8 +204,8 @@ export default function AdminPage() {
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8 animate-fadeInUp">
-              <h1 className="text-3xl font-bold gradient-text mb-2">Admin Dashboard</h1>
-              <p className="text-muted-color">Manage candidates and their information</p>
+              <h1 className="text-3xl font-bold gradient-text mb-2">{t("admin.title")}</h1>
+              <p className="text-muted-color">{t("admin.desc")}</p>
             </div>
 
             {/* Global Settings */}
@@ -214,11 +216,11 @@ export default function AdminPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                 </span>
-                Live Stream Configuration
+                {t("admin.live_config")}
               </h2>
               <form onSubmit={handleSaveSettings} className="flex gap-4 items-end">
                 <div className="flex-1">
-                  <label className="block text-sm text-secondary-color mb-2">Facebook Live URL (Leave empty to hide)</label>
+                  <label className="block text-sm text-secondary-color mb-2">{t("admin.facebook_label")}</label>
                   <input
                     type="text"
                     className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
@@ -232,7 +234,7 @@ export default function AdminPage() {
                   disabled={savingSettings}
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-red-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50"
                 >
-                  {savingSettings ? "Saving..." : "Update Live Link"}
+                  {savingSettings ? t("admin.saving") : t("admin.update_link")}
                 </button>
               </form>
             </div>
@@ -243,7 +245,7 @@ export default function AdminPage() {
                 <div className="glass-card rounded-2xl p-6 sticky top-24 animate-fadeInUp">
                   <h2 className="text-xl font-semibold text-primary-color mb-6 flex items-center gap-2">
                     <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-sm text-white">+</span>
-                    Add Candidate
+                    {t("admin.add_candidate")}
                   </h2>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -273,7 +275,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-secondary-color mb-2">First Name *</label>
+                      <label className="block text-sm text-secondary-color mb-2">{t("admin.firstname")} *</label>
                       <input
                         type="text"
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
@@ -284,7 +286,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-secondary-color mb-2">Last Name *</label>
+                      <label className="block text-sm text-secondary-color mb-2">{t("admin.lastname")} *</label>
                       <input
                         type="text"
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
@@ -295,7 +297,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-secondary-color mb-2">Nickname *</label>
+                      <label className="block text-sm text-secondary-color mb-2">{t("admin.nickname")} *</label>
                       <input
                         type="text"
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
@@ -306,15 +308,15 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-secondary-color mb-2">Class *</label>
+                      <label className="block text-sm text-secondary-color mb-2">{t("admin.class")} *</label>
                       <select
                         className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color focus:border-purple-500 focus:outline-none transition-colors"
                         value={studentClass}
                         onChange={(e) => setStudentClass(e.target.value)}
                       >
-                        <option value="1" className="bg-white dark:bg-[#12121a] text-primary-color">Class 1</option>
-                        <option value="2" className="bg-white dark:bg-[#12121a] text-primary-color">Class 2</option>
-                        <option value="3" className="bg-white dark:bg-[#12121a] text-primary-color">Class 3</option>
+                        <option value="1" className="bg-white dark:bg-[#12121a] text-primary-color">{t("admin.class")} 1</option>
+                        <option value="2" className="bg-white dark:bg-[#12121a] text-primary-color">{t("admin.class")} 2</option>
+                        <option value="3" className="bg-white dark:bg-[#12121a] text-primary-color">{t("admin.class")} 3</option>
                       </select>
                     </div>
 
@@ -323,7 +325,7 @@ export default function AdminPage() {
                       disabled={submitting}
                       className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {submitting ? "Adding..." : "Add Candidate"}
+                      {submitting ? t("admin.adding") : t("admin.add_candidate")}
                     </button>
                   </form>
                 </div>
@@ -334,7 +336,7 @@ export default function AdminPage() {
                 <div className="animate-fadeInUp" style={{ animationDelay: "100ms" }}>
                   <h2 className="text-xl font-semibold text-primary-color mb-4 flex items-center gap-2">
                     <span className="w-1 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500"></span>
-                    Candidates ({candidates.length})
+                    {t("stats.candidates")} ({candidates.length})
                   </h2>
 
                   {loading ? (

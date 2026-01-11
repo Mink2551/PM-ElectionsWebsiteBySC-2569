@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 interface Policy {
   title: string;
@@ -24,6 +25,7 @@ interface Candidate {
 
 export default function PoliciesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: candidateId } = React.use(params);
+  const { t } = useLanguage();
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -191,9 +193,9 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
         <Navbar />
         <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh]">
           <div className="glass-card rounded-2xl p-12 text-center">
-            <p className="text-white/50 text-xl">Candidate not found</p>
+            <p className="text-white/50 text-xl">{t("profile.not_found")}</p>
             <a href="/" className="mt-4 inline-block text-purple-400 hover:text-purple-300">
-              ← Back to Home
+              ← {t("btn.back_home")}
             </a>
           </div>
         </div>
@@ -218,7 +220,7 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Profile
+            {t("policies.back")}
           </a>
 
           {/* Header */}
@@ -226,9 +228,9 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
             <h1 className="text-3xl md:text-4xl font-bold text-primary-color mb-2">
               {candidate.firstname} {candidate.lastname}'s
             </h1>
-            <p className="text-2xl gradient-text font-semibold">Policies & Visions</p>
+            <p className="text-2xl gradient-text font-semibold">{t("policies.title")}</p>
             <p className="text-muted-color mt-4">
-              {policies.length} {policies.length === 1 ? 'policy' : 'policies'} proposed
+              {policies.length} {t("policies.proposed")}
             </p>
           </div>
 
@@ -255,8 +257,8 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-muted-color text-lg">No policies published yet</p>
-              <p className="text-muted-color text-sm mt-1">Check back later for updates</p>
+              <p className="text-muted-color text-lg">{t("policies.none")}</p>
+              <p className="text-muted-color text-sm mt-1">{t("policies.check_later")}</p>
             </div>
           )}
         </div>
@@ -299,6 +301,7 @@ function PolicyCard({
   onOpenComments: () => void;
   commentCount: number;
 }) {
+  const { language, t } = useLanguage();
   return (
     <div
       className="glass-card rounded-2xl p-6 md:p-8 card-hover animate-fadeInUp flex flex-col justify-between h-full"
@@ -344,10 +347,10 @@ function PolicyCard({
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            {commentCount} Comments
+            {commentCount} {t("sidebar.comments")}
           </span>
           <span className="text-sm text-purple-400 group-hover:text-purple-300 transition-colors">
-            Open Comments →
+            {language === "en" ? "Open Comments →" : "ดูความคิดเห็น →"}
           </span>
         </button>
       </div>
@@ -375,6 +378,7 @@ function CommentSidebar({
   onCommentReaction: (commentId: string, type: 'like' | 'dislike') => Promise<string>;
   onCommentAdded: (commentId: string, comment: any) => void;
 }) {
+  const { t } = useLanguage();
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [localComments, setLocalComments] = useState(
@@ -459,7 +463,7 @@ function CommentSidebar({
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-glass-border flex items-center justify-between bg-glass">
-            <h3 className="text-xl font-bold text-primary-color">Comments</h3>
+            <h3 className="text-xl font-bold text-primary-color">{t("sidebar.comments")}</h3>
             <button
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-layer-1 text-muted-color hover:text-white transition-colors"
@@ -473,7 +477,7 @@ function CommentSidebar({
           {/* Comment List (Scrollable) */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             <div className="mb-6">
-              <h4 className="text-sm font-semibold text-muted-color mb-2">Discussing Policy:</h4>
+              <h4 className="text-sm font-semibold text-muted-color mb-2">{t("sidebar.discussing")}</h4>
               <p className="text-primary-color font-medium">{policy.title}</p>
             </div>
 
@@ -516,8 +520,8 @@ function CommentSidebar({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
-                <p className="text-muted-color">No comments yet</p>
-                <p className="text-sm text-white/40 mt-1">Start the conversation!</p>
+                <p className="text-muted-color">{t("sidebar.no_comments")}</p>
+                <p className="text-sm text-white/40 mt-1">{t("sidebar.start_conversation")}</p>
               </div>
             )}
           </div>
@@ -528,7 +532,7 @@ function CommentSidebar({
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Share your thoughts..."
+                placeholder={t("sidebar.placeholder")}
                 className="w-full px-4 py-3 pr-12 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none resize-none h-24 text-sm"
               />
               <button

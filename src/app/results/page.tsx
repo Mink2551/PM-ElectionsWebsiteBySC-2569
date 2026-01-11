@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 interface Candidate {
     id: string;
@@ -21,6 +22,7 @@ export default function ResultsPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalVotes, setTotalVotes] = useState(0);
+    const { t } = useLanguage();
 
     useEffect(() => {
         // Real-time listener for candidates
@@ -53,22 +55,22 @@ export default function ResultsPage() {
                     <div className="text-center mb-12 animate-fadeInUp">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-secondary-color mb-4">
                             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                            Live Updates
+                            {t("results.updates")}
                         </div>
                         <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
-                            Live Election Results
+                            {t("results.title")}
                         </h1>
                         <p className="text-muted-color">
-                            Real-time vote tracking for PM Student Council 2569
+                            {t("results.desc")}
                         </p>
                     </div>
 
                     {/* Stats */}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
-                        <StatCard label="Total Votes" value={totalVotes} />
-                        <StatCard label="Candidates" value={candidates.length} />
+                        <StatCard label={t("results.total")} value={totalVotes} />
+                        <StatCard label={t("stats.candidates")} value={candidates.length} />
                         <div className="hidden md:block">
-                            <StatCard label="Last Updated" value="Live" isLive />
+                            <StatCard label={t("results.last_updated")} value={t("results.live")} isLive />
                         </div>
                     </div>
 
@@ -93,7 +95,7 @@ export default function ResultsPage() {
 
                             {candidates.length === 0 && (
                                 <div className="glass-card rounded-2xl p-12 text-center">
-                                    <p className="text-white/50 text-lg">No candidates registered yet</p>
+                                    <p className="text-white/50 text-lg">{t("no_candidates")}</p>
                                 </div>
                             )}
                         </div>
@@ -121,6 +123,7 @@ function StatCard({ label, value, isLive }: { label: string; value: number | str
 
 /* Result Card */
 function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; rank: number; totalVotes: number }) {
+    const { t } = useLanguage();
     const percentage = totalVotes > 0 ? ((candidate.votes || 0) / totalVotes) * 100 : 0;
 
     const getRankStyle = () => {
@@ -166,7 +169,7 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
                 {/* Vote Count */}
                 <div className="text-right">
                     <p className="text-2xl font-bold gradient-text">{candidate.votes || 0}</p>
-                    <p className="text-xs text-muted-color">votes</p>
+                    <p className="text-xs text-muted-color">{t("results.votes")}</p>
                 </div>
             </div>
 
