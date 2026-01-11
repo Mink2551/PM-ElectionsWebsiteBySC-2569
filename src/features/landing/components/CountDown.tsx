@@ -16,10 +16,8 @@ function Separator() {
 }
 
 export default function Countdown() {
-  // Election date: 22 days from now at 10:00 AM
-  const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() + 22);
-  targetDate.setHours(10, 0, 0, 0);
+  // Election date: 28/01/2569 (2026) at 10:00 AM
+  const targetDate = new Date("2026-01-28T10:00:00");
 
   const { days, hours, minutes, seconds } = useCountdown(targetDate);
 
