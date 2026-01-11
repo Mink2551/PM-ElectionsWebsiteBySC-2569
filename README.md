@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PM Student Council Elections 2569 🗳️
 
-## Getting Started
+> A premium, dark-themed election platform for the Student Council 2569 elections.
 
-First, run the development server:
+![Project Preview](/public/hero.png) *Add a screenshot here if available*
+
+## 🌟 Features
+
+### 🎨 Premium Design
+- **Dark Mode Enforced**: A sleek, professional dark theme (`#0a0a0f`) with SC Red and PM Pink/Yellow accents.
+- **Glassmorphism**: Modern frosted glass effects on cards, headers, and overlays.
+- **Animations**: Smooth fade-ins, hover lifts, and pulse effects for an engaging user experience.
+
+### 🗳️ Election Features
+- **Live Results**: Real-time vote tracking with animated progress bars.
+- **Candidate Profiles**: Detailed pages with policy breakdowns, stats, and biographies.
+- **Policy Interaction**: Like/Dislike system for candidate policies with persistent state.
+- **Countdown Timer**: 2x2 responsive countdown grid leading up to election day.
+
+### 📱 Responsive & Accessible
+- **Mobile First**: Fully responsive layout with a custom mobile sidebar.
+- **Cross-Platform**: Optimized for desktop, tablet, and mobile devices.
+- **Accessible Navigation**: Clear navigation with hash links (`/#candidates`) for seamless browsing.
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + Custom CSS Variables
+- **Language**: TypeScript
+- **State Persistence**: `js-cookie`
+- **Icons**: Material UI Icons
+- **Deployment**: Vercel (Recommended)
+
+## 🚀 Getting Started
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/your-username/sc-elections-2026.git
+    cd sc-elections-2026
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+
+3.  **Run the development server**
+    ```bash
+    npm run dev
+    ```
+
+4.  **Open in Browser**
+    Visit `http://localhost:3000` to see the application.
+
+## 📂 Project Structure
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+src/
+├── app/              # Next.js App Router pages
+├── components/       # Shared UI components
+├── context/          # React Contexts (e.g., Theme - *Removed in v2*)
+├── features/         # Feature-specific components (Landing, Navbar, Footer)
+├── hooks/            # Custom hooks (useCountdown, etc.)
+└── style/            # Global styles and Tailwind directives
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎨 Color Palette
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Color | Hex | Usage |
+|-------|-----|-------|
+| **Background** | `#0a0a0f` | Main background |
+| **SC Red** | `#EF4444` | Primary actions, gradients |
+| **PM Pink** | `#EC4899` | Accents, gradients |
+| **PM Yellow** | `#F59E0B` | Accents, highlights |
+| **Text** | `#FFFFFF` | Primary text |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contributing
 
-## Learn More
+1.  Fork the project
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-To learn more about Next.js, take a look at the following resources:
+## 📄 License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Distributed under the MIT License. See `LICENSE` for more information.

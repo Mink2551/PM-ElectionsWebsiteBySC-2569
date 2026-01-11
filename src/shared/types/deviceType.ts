@@ -1,0 +1,1 @@
+export type DeviceType = "phone" | "ipad" | "laptop" | "pc";
