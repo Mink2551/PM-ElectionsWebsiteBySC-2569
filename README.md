@@ -47,7 +47,7 @@
 1.  **Clone the repository**
     ```bash
     git clone https://github.com/Mink2551/PM-ElectionsWebsiteBySC-2569.git
-    cd sc-elections-2026
+    cd PM-ElectionsWebsiteBySC-2569
     ```
 
 2.  **Install dependencies**
