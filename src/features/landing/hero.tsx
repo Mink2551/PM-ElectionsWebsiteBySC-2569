@@ -9,6 +9,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 export default function Hero() {
   const device = useDeviceType();
   const [candidates, setCandidates] = useState<any[]>([]);
+  const [trendingPolicies, setTrendingPolicies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
 
@@ -25,6 +26,42 @@ export default function Hero() {
           ...doc.data(),
         }));
         setCandidates(docs);
+
+        // Calculate Trending Policies
+        const allPolicies: any[] = [];
+        docs.forEach((candidate: any) => {
+          if (candidate.policies) {
+            Object.entries(candidate.policies).forEach(([id, policy]: [string, any]) => {
+              // Calculate interaction score
+              let commentLikes = 0;
+              const comments = policy.comments ? Object.values(policy.comments) : [];
+              comments.forEach((c: any) => {
+                commentLikes += (c.likes || 0) + (c.dislikes || 0); // Count all reactions as engagement
+              });
+
+              const score = (policy.likes || 0) + comments.length + commentLikes;
+
+              allPolicies.push({
+                id,
+                ...policy,
+                candidateName: `${candidate.firstname} ${candidate.lastname}`,
+                candidateNickname: candidate.nickname,
+                candidateId: candidate.id,
+                candidateImage: candidate.imageUrl || candidate.photoURL,
+                commentCount: comments.length,
+                totalLikes: policy.likes || 0,
+                interactionScore: score
+              });
+            });
+          }
+        });
+
+        // Get Top 5
+        const top5 = allPolicies
+          .sort((a, b) => b.interactionScore - a.interactionScore)
+          .slice(0, 5);
+
+        setTrendingPolicies(top5);
 
         // Fetch Live Settings
         const settingsSnap = await getDoc(doc(db, "settings", "config"));
@@ -173,9 +210,107 @@ export default function Hero() {
               ))}
             </div>
           )}
+
+          {/* ================= TRENDING POLICIES SECTION ================= */}
+          {!loading && trendingPolicies.length > 0 && (
+            <div className="pt-16 animate-fadeInUp" style={{ animationDelay: '300ms' }}>
+              <div className="flex flex-col items-center text-center space-y-2 mb-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 text-pink-400 text-xs font-bold uppercase tracking-wider mb-2">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1014 0c0-1.187-.204-2.326-.576-3.386a1 1 0 00-.47-.525l-.21-.104a1 1 0 00-.42-.084l-.127.012a1 1 0 00-.843.837c-.11.69-.26 1.463-.454 2.21a3.033 3.033 0 01-.225.688 1 1 0 01-1.25.433 3.01 3.01 0 01-1.636-2.639c0-.74.153-1.442.42-2.072.26-.61.623-1.164 1.054-1.637a1 1 0 00.317-.679z" clipRule="evenodd" />
+                  </svg>
+                  {t("results.live")}
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                  {t("section.trending.title")}
+                </h2>
+                <p className="text-white/50 text-sm max-w-xl">
+                  {t("section.trending.desc")}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {trendingPolicies.map((policy, index) => (
+                  <TrendingPolicyCard key={`${policy.candidateId}-${policy.id}`} policy={policy} index={index} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
+  );
+}
+
+/* ================= TRENDING POLICY CARD ================= */
+function TrendingPolicyCard({ policy, index }: { policy: any; index: number }) {
+  const { t } = useLanguage();
+  return (
+    <div
+      className="glass-card rounded-2xl p-6 flex flex-col gap-4 border-l-4 border-indigo-500 hover:bg-white/5 transition-all duration-300 card-hover"
+      style={{ animationDelay: `${index * 150}ms` }}
+    >
+      {/* Interaction Badge */}
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+            <span className="text-indigo-400 font-bold text-xs">#{index + 1}</span>
+          </div>
+          <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">{t("common.interactions")}</span>
+        </div>
+        <div className="px-2 py-1 rounded bg-white/5 border border-white/10 text-white/60 text-[10px] font-mono">
+          ENG: {policy.interactionScore}
+        </div>
+      </div>
+
+      <h3 className="font-bold text-white leading-snug line-clamp-2 min-h-[3rem]">
+        {policy.title}
+      </h3>
+
+      {/* Candidate attribution */}
+      <div className="flex items-center gap-3 py-2 border-t border-white/5 mt-2">
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 border border-white/10">
+          {policy.candidateImage ? (
+            <img src={policy.candidateImage} alt={policy.candidateName} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-indigo-400">
+              {policy.candidateName[0]}
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-white/80 truncate">{policy.candidateName}</p>
+          <p className="text-[10px] text-white/40 truncate">
+            {policy.candidateNickname && `"${policy.candidateNickname}"`}
+          </p>
+        </div>
+        <a
+          href={`/candidate/${policy.candidateId}/policies`}
+          className="p-2 rounded-lg bg-white/5 text-white/40 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+          title="See this policy"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+
+      {/* Stats Bar */}
+      <div className="grid grid-cols-2 gap-2 mt-auto">
+        <div className="bg-white/5 rounded-xl p-2 flex items-center gap-2 justify-center">
+          <svg className="w-3 h-3 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+          </svg>
+          <span className="text-xs font-bold text-white/80">{policy.totalLikes}</span>
+        </div>
+        <div className="bg-white/5 rounded-xl p-2 flex items-center gap-2 justify-center">
+          <svg className="w-3 h-3 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+          </svg>
+          <span className="text-xs font-bold text-white/80">{policy.commentCount}</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
