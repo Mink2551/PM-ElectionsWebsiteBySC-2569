@@ -110,7 +110,6 @@ export default function Hero() {
         <div className="flex justify-center gap-8 md:gap-16 mb-16">
           <StatBox value={candidates.length} label={t("stats.candidates")} />
           <StatBox value="500+" label={t("stats.voters")} />
-          <StatBox value="100%" label={t("stats.transparent")} />
         </div>
 
         {/* Live Stream Section */}

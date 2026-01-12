@@ -73,7 +73,7 @@ export default function ResultsPage() {
                             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                             {t("results.updates")}
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
+                        <h1 className="text-4xl md:text-5xl font-bold py-4 gradient-text mb-4">
                             {t("results.title")}
                         </h1>
                         <p className="text-muted-color">
@@ -183,7 +183,7 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
                         {candidate.firstname} {candidate.lastname}
                     </p>
                     <p className="text-sm text-muted-color">
-                        {candidate.nickname && `"${candidate.nickname}" • `}Class {candidate.class}
+                        {candidate.nickname && `"${candidate.nickname}" • `}Class 4 / {candidate.class}
                     </p>
                 </div>
 
