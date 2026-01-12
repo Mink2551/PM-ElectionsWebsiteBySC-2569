@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // 🗳️ PM Student Board Election 2569
+    // Firestore Security Rules
+    // ============================================
+    
+    // ----------------
+    // Candidates Collection
+    // ----------------
+    match /candidates/{candidateId} {
+      // Anyone can read candidate data (public info)
+      allow read: if true;
+      
+      // Only authenticated users can create/delete candidates
+      // Note: This requires Firebase Auth to be set up
+      allow create, delete: if request.auth != null;
+      
+      // For updates, we need granular control:
+      // - Votes can only be incremented (not decremented by normal users)
+      // - Policy likes can be incremented
+      // - Comments can be added but not deleted by others
+      allow update: if 
+        // Allow authenticated admins full access
+        request.auth != null
+        ||
+        // Allow public to increment votes/likes (for now, until Firebase Auth is set up)
+        // This is permissive - tighten after adding Firebase Auth
+        (
+          // Only allow specific field updates
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['votes', 'policies'])
+        );
+    }
+    
+    // ----------------
+    // Settings Collection (Admin Only)
+    // ----------------
+    match /settings/{settingId} {
+      // Anyone can read settings (for live URL, etc.)
+      allow read: if true;
+      
+      // Only authenticated users can write settings
+      allow write: if request.auth != null;
+    }
+    
+    // ----------------
+    // Default: Deny All Other Access
+    // ----------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
