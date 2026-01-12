@@ -61,6 +61,17 @@ service cloud.firestore {
     }
     
     // ----------------
+    // Alerts Collection (Global announcements)
+    // ----------------
+    match /alerts/{alertId} {
+      // Anyone can read alerts (public announcements)
+      allow read: if true;
+      
+      // TEMPORARY: Allow write until Firebase Auth is implemented
+      allow write: if true;
+    }
+    
+    // ----------------
     // Default: Deny All Other Access
     // ----------------
     match /{document=**} {

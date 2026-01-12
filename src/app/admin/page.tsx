@@ -233,6 +233,18 @@ export default function AdminPage() {
                 >
                   📜 Logs
                 </a>
+                <a
+                  href="/admin/docs"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-pink-500/30 transition-all"
+                >
+                  📖 Docs
+                </a>
+                <a
+                  href="/admin/alerts"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-yellow-500/30 transition-all"
+                >
+                  🔔 Alerts
+                </a>
               </div>
             </div>
 

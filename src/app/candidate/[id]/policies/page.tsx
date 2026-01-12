@@ -9,6 +9,7 @@ import Footer from "@/features/footer/Footer";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useUser } from "@/shared/context/UserContext";
 
+
 interface Policy {
   title: string;
   description: string;
@@ -21,6 +22,8 @@ interface Candidate {
   firstname: string;
   lastname: string;
   nickname?: string;
+  imageUrl?: string;
+  photoURL?: string;
   policies?: Record<string, Policy>;
 }
 
