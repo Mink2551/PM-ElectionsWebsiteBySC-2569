@@ -10,6 +10,7 @@ export default function Hero() {
   const device = useDeviceType();
   const [candidates, setCandidates] = useState<any[]>([]);
   const [trendingPolicies, setTrendingPolicies] = useState<any[]>([]);
+  const [topCandidates, setTopCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
 
@@ -62,6 +63,31 @@ export default function Hero() {
           .slice(0, 5);
 
         setTrendingPolicies(top5);
+
+        // Calculate Top Candidates (based on total engagement)
+        const candidateScores = docs.map((candidate: any) => {
+          let totalScore = 0;
+          if (candidate.policies) {
+            Object.values(candidate.policies).forEach((policy: any) => {
+              let commentLikes = 0;
+              const comments = policy.comments ? Object.values(policy.comments) : [];
+              comments.forEach((c: any) => {
+                commentLikes += (c.likes || 0) + (c.dislikes || 0);
+              });
+              totalScore += (policy.likes || 0) + comments.length + commentLikes;
+            });
+          }
+          return {
+            ...candidate,
+            totalEngagement: totalScore
+          };
+        });
+
+        const top3Candidates = candidateScores
+          .sort((a, b) => b.totalEngagement - a.totalEngagement)
+          .slice(0, 3);
+
+        setTopCandidates(top3Candidates);
 
         // Fetch Live Settings
         const settingsSnap = await getDoc(doc(db, "settings", "config"));
@@ -229,9 +255,71 @@ export default function Hero() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Horizontal Scroll Container */}
+              <div className="flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide snap-x">
                 {trendingPolicies.map((policy, index) => (
-                  <TrendingPolicyCard key={`${policy.candidateId}-${policy.id}`} policy={policy} index={index} />
+                  <div key={`${policy.candidateId}-${policy.id}`} className="flex-none w-[300px] md:w-[350px] snap-center">
+                    <TrendingPolicyCard policy={policy} index={index} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= TOP CANDIDATES SECTION ================= */}
+          {!loading && topCandidates.length > 0 && (
+            <div className="pt-20 animate-fadeInUp" style={{ animationDelay: '500ms' }}>
+              <div className="flex flex-col items-center text-center space-y-2 mb-10">
+                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                  {t("section.top_candidates.title")}
+                </h2>
+                <p className="text-white/50 text-sm max-w-xl">
+                  {t("section.top_candidates.desc")}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {topCandidates.map((c, index) => (
+                  <div
+                    key={c.id}
+                    className="glass-card rounded-2xl p-6 flex flex-col items-center text-center space-y-4 card-hover relative overflow-hidden"
+                  >
+                    {/* Rank Badge */}
+                    <div className="absolute top-4 left-4 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 font-bold text-black flex items-center justify-center shadow-lg shadow-orange-500/20">
+                      {index + 1}
+                    </div>
+
+                    <div className="relative pt-2">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+                        <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
+                          {c.imageUrl || c.photoURL ? (
+                            <img src={c.imageUrl || c.photoURL} alt={c.firstname} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-xl font-bold gradient-text">{c.firstname[0]}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-bold text-white text-lg">{c.firstname} {c.lastname}</p>
+                      <p className="text-xs text-white/40 uppercase tracking-widest mt-1">Total Engagement: {c.totalEngagement}</p>
+                    </div>
+
+                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000"
+                        style={{ width: `${(c.totalEngagement / topCandidates[0].totalEngagement) * 100}%` }}
+                      />
+                    </div>
+
+                    <a
+                      href={`/candidate/${c.id}/profile`}
+                      className="text-sm font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      View Full Profile →
+                    </a>
+                  </div>
                 ))}
               </div>
             </div>

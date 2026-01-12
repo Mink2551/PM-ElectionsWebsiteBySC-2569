@@ -18,7 +18,7 @@
   --bg-secondary: #12121a;
   --bg-card: rgba(255, 255, 255, 0.05);
   --bg-glass: rgba(10, 10, 15, 0.85);
-  
+
   /* Text Colors */
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.7);
@@ -321,4 +321,13 @@ body {
   background: #EC4899; /* Pink */
   bottom: -50px;
   right: 20%;
+}
+
+/* Utils */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
