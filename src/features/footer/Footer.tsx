@@ -11,7 +11,7 @@ export default function Footer() {
   return (
     <footer className="relative w-full mt-20 overflow-hidden">
       {/* Top Gradient Border */}
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+      <div className="h-px w-full bg-accent-line" style={{ background: 'linear-gradient(to right, transparent, var(--accent-primary, #a855f7), transparent)' }} />
 
       {/* Main Footer */}
       <div className="bg-secondary py-12 px-6 transition-colors duration-300">
@@ -25,7 +25,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-3 justify-center md:justify-start">
               {/* Logo */}
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-accent-gradient flex items-center justify-center">
                 <span className="text-white font-bold text-lg">PM</span>
               </div>
               <div>
@@ -117,7 +117,7 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
     <a
       href={href}
       aria-label={label}
-      className="w-10 h-10 rounded-lg bg-layer-1 flex items-center justify-center text-muted-color hover:text-white hover:bg-gradient-to-br hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 transition-all duration-300"
+      className="w-10 h-10 rounded-lg bg-layer-1 flex items-center justify-center text-muted-color hover:text-white hover:bg-accent-gradient transition-all duration-300"
     >
       {children}
     </a>

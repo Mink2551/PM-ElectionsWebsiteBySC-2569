@@ -60,7 +60,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
         <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh]">
           <div className="glass-card rounded-2xl p-12 text-center">
             <p className="text-white/50 text-xl">{t("profile.not_found")}</p>
-            <a href="/" className="mt-4 inline-block text-purple-400 hover:text-purple-300">
+            <a href="/" className="mt-4 inline-block text-accent hover:opacity-80">
               ← {t("btn.back_home")}
             </a>
           </div>
@@ -92,7 +92,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
             <div className="flex justify-center mb-8">
               <div className="relative">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[4px] animate-pulseGlow">
-                  <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                     {candidate.imageUrl || candidate.photoURL ? (
                       <img
                         src={candidate.imageUrl || candidate.photoURL}
@@ -120,7 +120,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                 {candidate.firstname} {candidate.lastname}
               </h1>
               {candidate.nickname && (
-                <p className="text-purple-400 text-lg">"{candidate.nickname}"</p>
+                <p className="text-accent text-lg">"{candidate.nickname}"</p>
               )}
               <p className="text-muted-color">Class 4 / {candidate.class}</p>
             </div>
@@ -186,7 +186,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
               {policyCount > 3 && (
                 <a
                   href={`/candidate/${candidate.id}/policies`}
-                  className="block mt-4 text-center text-purple-400 hover:text-purple-300 text-sm"
+                  className="block mt-4 text-center text-accent hover:opacity-80 text-sm"
                 >
                   {t("btn.view_all_policies")} {policyCount} {t("profile.policies")} →
                 </a>

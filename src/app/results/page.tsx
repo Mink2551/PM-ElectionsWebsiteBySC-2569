@@ -93,7 +93,7 @@ export default function ResultsPage() {
                     {/* Loading State */}
                     {loading && (
                         <div className="flex justify-center py-12">
-                            <div className="w-10 h-10 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+                            <div className="w-10 h-10 rounded-full border-2 spinner-accent animate-spin" />
                         </div>
                     )}
 
@@ -116,7 +116,7 @@ export default function ResultsPage() {
 
                             {candidates.length === 0 && (
                                 <div className="glass-card rounded-2xl p-12 text-center">
-                                    <p className="text-white/50 text-lg">{t("no_candidates")}</p>
+                                    <p className="text-muted-color text-lg">{t("no_candidates")}</p>
                                 </div>
                             )}
                         </div>
@@ -163,7 +163,7 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
                 </div>
 
                 {/* Avatar */}
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+                <div className="w-14 h-14 rounded-full bg-accent-gradient p-[2px]">
                     <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center overflow-hidden">
                         {candidate.imageUrl || candidate.photoURL ? (
                             <img
@@ -198,7 +198,7 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
             <div className="mt-4">
                 <div className="h-2 bg-layer-2 rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                        className="h-full bg-accent-gradient rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                     />
                 </div>

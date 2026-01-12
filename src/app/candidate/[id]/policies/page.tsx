@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useUser } from "@/shared/context/UserContext";
 
 interface Policy {
   title: string;
@@ -26,6 +27,7 @@ interface Candidate {
 export default function PoliciesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: candidateId } = React.use(params);
   const { t } = useLanguage();
+  const { user, requireVerification } = useUser();
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +90,9 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
   }, [candidateId]);
 
   const handleLike = async (policyId: string) => {
+    // Require user verification before liking
+    if (!requireVerification()) return;
+
     if (likedPolicies.has(policyId)) return;
 
     try {
@@ -120,6 +125,9 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
   };
 
   const handleCommentReaction = async (policyId: string, commentId: string, type: 'like' | 'dislike') => {
+    // Require user verification before reacting
+    if (!requireVerification()) return "blocked";
+
     const currentReaction = commentReactions[commentId];
     const ref = doc(db, "candidates", candidateId);
 
@@ -194,7 +202,7 @@ export default function PoliciesPage({ params }: { params: Promise<{ id: string 
         <div className="pt-24 flex flex-col items-center justify-center min-h-[60vh]">
           <div className="glass-card rounded-2xl p-12 text-center">
             <p className="text-white/50 text-xl">{t("profile.not_found")}</p>
-            <a href="/" className="mt-4 inline-block text-purple-400 hover:text-purple-300">
+            <a href="/" className="mt-4 inline-block text-accent hover:opacity-80">
               ← {t("btn.back_home")}
             </a>
           </div>
@@ -311,7 +319,7 @@ function PolicyCard({
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white">
+            <div className="w-10 h-10 rounded-xl bg-accent-gradient-simple flex items-center justify-center font-bold text-white">
               {index + 1}
             </div>
             <h2 className="text-xl font-semibold text-primary-color line-clamp-2">{policy.title}</h2>
@@ -349,7 +357,7 @@ function PolicyCard({
             </svg>
             {commentCount} {t("sidebar.comments")}
           </span>
-          <span className="text-sm text-purple-400 group-hover:text-purple-300 transition-colors">
+          <span className="text-sm text-accent group-hover:opacity-80 transition-colors">
             {language === "en" ? "Open Comments →" : "ดูความคิดเห็น →"}
           </span>
         </button>
@@ -379,6 +387,7 @@ function CommentSidebar({
   onCommentAdded: (commentId: string, comment: any) => void;
 }) {
   const { t } = useLanguage();
+  const { user, requireVerification } = useUser();
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [localComments, setLocalComments] = useState(
@@ -393,6 +402,9 @@ function CommentSidebar({
   }, [policy]);
 
   const handleAddComment = async () => {
+    // Require user verification before commenting
+    if (!requireVerification()) return;
+
     if (!commentText.trim()) return;
 
     setSubmitting(true);
@@ -404,6 +416,8 @@ function CommentSidebar({
         likes: 0,
         dislikes: 0,
         createdAt: new Date().toISOString(),
+        authorId: user?.studentId || "anonymous",
+        authorNickname: user?.nickname || "Anonymous",
       };
 
       const ref = doc(db, "candidates", candidateId);
@@ -458,7 +472,8 @@ function CommentSidebar({
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#12121a] border-l border-glass-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full md:w-[450px] border-l border-glass-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ backgroundColor: 'var(--bg-secondary)' }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -466,7 +481,7 @@ function CommentSidebar({
             <h3 className="text-xl font-bold text-primary-color">{t("sidebar.comments")}</h3>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-layer-1 text-muted-color hover:text-white transition-colors"
+              className="p-2 rounded-lg hover:bg-layer-1 text-muted-color hover:text-primary-color transition-colors"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -486,6 +501,19 @@ function CommentSidebar({
                 const userReaction = commentReactions[comment.id];
                 return (
                   <div key={i} className="p-4 rounded-xl bg-layer-1 animate-fadeIn">
+                    {/* Author Info */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-accent-gradient-simple flex items-center justify-center text-white text-[10px] font-bold">
+                        {comment.authorNickname?.[0]?.toUpperCase() || "?"}
+                      </div>
+                      <span className="text-sm font-medium text-primary-color">
+                        {comment.authorNickname || "Anonymous"}
+                      </span>
+                      <span className="text-xs text-muted-color">
+                        #{comment.authorId || "???"}
+                      </span>
+                    </div>
+
                     <p className="text-sm text-secondary-color leading-relaxed">{comment.text}</p>
                     <div className="flex items-center gap-4 mt-3 pt-3 border-t border-glass-border">
                       <button
@@ -521,7 +549,7 @@ function CommentSidebar({
                   </svg>
                 </div>
                 <p className="text-muted-color">{t("sidebar.no_comments")}</p>
-                <p className="text-sm text-white/40 mt-1">{t("sidebar.start_conversation")}</p>
+                <p className="text-sm text-muted-color mt-1">{t("sidebar.start_conversation")}</p>
               </div>
             )}
           </div>

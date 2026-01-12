@@ -14,36 +14,50 @@ service cloud.firestore {
       // Anyone can read candidate data (public info)
       allow read: if true;
       
-      // Only authenticated users can create/delete candidates
-      // Note: This requires Firebase Auth to be set up
-      allow create, delete: if request.auth != null;
+      // TEMPORARY: Allow create/delete until Firebase Auth is implemented
+      allow create, delete: if true;
       
-      // For updates, we need granular control:
-      // - Votes can only be incremented (not decremented by normal users)
-      // - Policy likes can be incremented
-      // - Comments can be added but not deleted by others
-      allow update: if 
-        // Allow authenticated admins full access
-        request.auth != null
-        ||
-        // Allow public to increment votes/likes (for now, until Firebase Auth is set up)
-        // This is permissive - tighten after adding Firebase Auth
-        (
-          // Only allow specific field updates
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['votes', 'policies'])
-        );
+      // TEMPORARY: Allow update until Firebase Auth is implemented
+      allow update: if true;
     }
     
     // ----------------
-    // Settings Collection (Admin Only)
+    // Settings Collection (Public read, Admin write)
     // ----------------
     match /settings/{settingId} {
-      // Anyone can read settings (for live URL, etc.)
+      // Anyone can read settings (for live URL, schedule, etc.)
       allow read: if true;
       
-      // Only authenticated users can write settings
-      allow write: if request.auth != null;
+      // TEMPORARY: Allow writes until Firebase Auth is implemented
+      allow write: if true;
+    }
+    
+    // ----------------
+    // Users Collection (User verification data)
+    // ----------------
+    match /users/{userId} {
+      // Anyone can read user data (for checking blocked status)
+      allow read: if true;
+      
+      // Allow create for new user registration
+      allow create: if true;
+      
+      // TEMPORARY: Allow update/delete until Firebase Auth is implemented
+      allow update, delete: if true;
+    }
+    
+    // ----------------
+    // Logs Collection (Admin activity tracking)
+    // ----------------
+    match /logs/{logId} {
+      // Allow read for viewing logs in admin
+      allow read: if true;
+      
+      // Allow create for logging actions
+      allow create: if true;
+      
+      // Logs should not be modified or deleted
+      allow update, delete: if false;
     }
     
     // ----------------

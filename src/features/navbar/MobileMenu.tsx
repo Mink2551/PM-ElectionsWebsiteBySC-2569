@@ -1,6 +1,9 @@
 import CloseIcon from "@mui/icons-material/Close";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import NavLinks from "./NavLinks";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTheme } from "@/shared/context/ThemeContext";
 
 export default function MobileMenu({
   open,
@@ -10,6 +13,8 @@ export default function MobileMenu({
   onClose: () => void;
 }) {
   const { language, setLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <>
       {/* Overlay */}
@@ -24,10 +29,11 @@ export default function MobileMenu({
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 bg-[#0a0a0f] shadow-2xl border-r border-glass-border z-[100]
+          fixed top-0 left-0 h-full w-64 shadow-2xl border-r border-glass-border z-[100]
           transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
+        style={{ backgroundColor: 'var(--bg-primary)' }}
       >
         <div className="flex items-center justify-between p-4 border-b border-glass-border">
           <div className="flex flex-col">
@@ -35,10 +41,21 @@ export default function MobileMenu({
             <p className="text-[10px] text-muted-color capitalize">{t("hero.title1")}</p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-8 h-8 rounded-lg glass border border-white/10"
+            >
+              {theme === "dark" ? (
+                <LightModeIcon className="text-yellow-400 w-4 h-4" />
+              ) : (
+                <DarkModeIcon className="text-accent w-4 h-4" />
+              )}
+            </button>
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === "en" ? "th" : "en")}
-              className="flex items-center justify-center w-8 h-8 rounded-lg glass text-[10px] font-bold text-white border border-white/10"
+              className="flex items-center justify-center w-8 h-8 rounded-lg glass text-[10px] font-bold text-primary-color border border-white/10"
             >
               {language === "en" ? "TH" : "EN"}
             </button>

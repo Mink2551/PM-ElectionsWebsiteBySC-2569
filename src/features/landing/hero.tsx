@@ -127,7 +127,7 @@ export default function Hero() {
 
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-white/80">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-secondary-color">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
             {t("hero.badge")}
           </div>
@@ -144,11 +144,11 @@ export default function Hero() {
           >
             <span className="gradient-text">{t("hero.title1")}</span>
             <br />
-            <span className="text-white">{t("hero.title2")}</span>
+            <span className="text-primary-color">{t("hero.title2")}</span>
           </h1>
 
           {/* Description */}
-          <p className="text-white/60 max-w-2xl text-base md:text-lg leading-relaxed">
+          <p className="text-secondary-color max-w-2xl text-base md:text-lg leading-relaxed">
             {t("hero.desc")}
           </p>
 
@@ -156,13 +156,13 @@ export default function Hero() {
           <div className="flex flex-wrap justify-center gap-4 mt-4">
             <a
               href="#candidates"
-              className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-1"
+              className="px-8 py-3 rounded-xl bg-accent-gradient text-white font-semibold shadow-accent shadow-accent-hover transition-all duration-300 hover:-translate-y-1"
             >
               {t("hero.cta.view")}
             </a>
             <a
               href="/results"
-              className="px-8 py-3 rounded-xl border border-white/20 text-white font-semibold hover:bg-white/10 transition-all duration-300"
+              className="px-8 py-3 rounded-xl border border-current/20 text-primary-color font-semibold hover:bg-layer-1 transition-all duration-300"
             >
               {t("hero.cta.results")}
             </a>
@@ -200,10 +200,10 @@ export default function Hero() {
         <div id="candidates" className="space-y-8 scroll-mt-24">
           {/* Section Header */}
           <div className="flex flex-col items-center text-center space-y-2">
-            <h2 className="text-2xl md:text-3xl font-bold text-white">
+            <h2 className="text-2xl md:text-3xl font-bold text-primary-color">
               {t("section.candidates.title")}
             </h2>
-            <p className="text-white/50 text-sm">
+            <p className="text-muted-color text-sm">
               {t("section.candidates.desc")}
             </p>
           </div>
@@ -211,20 +211,20 @@ export default function Hero() {
           {/* Loading State */}
           {loading && (
             <div className="flex justify-center py-12">
-              <div className="w-10 h-10 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+              <div className="w-10 h-10 rounded-full border-2 spinner-accent animate-spin" />
             </div>
           )}
 
           {/* Empty State */}
           {!loading && candidates.length === 0 && (
             <div className="glass-card rounded-2xl p-12 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-layer-1 flex items-center justify-center">
+                <svg className="w-8 h-8 text-muted-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <p className="text-white/50 text-lg">{t("no_candidates")}</p>
-              <p className="text-white/30 text-sm mt-1">{t("check_back")}</p>
+              <p className="text-muted-color text-lg">{t("no_candidates")}</p>
+              <p className="text-muted-color text-sm mt-1">{t("check_back")}</p>
             </div>
           )}
 
@@ -247,10 +247,10 @@ export default function Hero() {
                   </svg>
                   {t("results.live")}
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary-color">
                   {t("section.trending.title")}
                 </h2>
-                <p className="text-white/50 text-sm max-w-xl">
+                <p className="text-muted-color text-sm max-w-xl">
                   {t("section.trending.desc")}
                 </p>
               </div>
@@ -270,10 +270,10 @@ export default function Hero() {
           {!loading && topCandidates.length > 0 && (
             <div className="pt-20 animate-fadeInUp" style={{ animationDelay: '500ms' }}>
               <div className="flex flex-col items-center text-center space-y-2 mb-10">
-                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary-color">
                   {t("section.top_candidates.title")}
                 </h2>
-                <p className="text-white/50 text-sm max-w-xl">
+                <p className="text-muted-color text-sm max-w-xl">
                   {t("section.top_candidates.desc")}
                 </p>
               </div>
@@ -290,8 +290,8 @@ export default function Hero() {
                     </div>
 
                     <div className="relative pt-2">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
-                        <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
+                      <div className="w-20 h-20 rounded-full bg-accent-gradient p-[2px]">
+                        <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                           {c.imageUrl || c.photoURL ? (
                             <img src={c.imageUrl || c.photoURL} alt={c.firstname} className="w-full h-full object-cover" />
                           ) : (
@@ -302,20 +302,20 @@ export default function Hero() {
                     </div>
 
                     <div>
-                      <p className="font-bold text-white text-lg">{c.firstname} {c.lastname}</p>
-                      <p className="text-xs text-white/40 uppercase tracking-widest mt-1">Total Engagement: {c.totalEngagement}</p>
+                      <p className="font-bold text-primary-color text-lg">{c.firstname} {c.lastname}</p>
+                      <p className="text-xs text-muted-color uppercase tracking-widest mt-1">Total Engagement: {c.totalEngagement}</p>
                     </div>
 
                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000"
+                        className="h-full bg-accent-gradient transition-all duration-1000"
                         style={{ width: `${(c.totalEngagement / topCandidates[0].totalEngagement) * 100}%` }}
                       />
                     </div>
 
                     <a
                       href={`/candidate/${c.id}/profile`}
-                      className="text-sm font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                      className="text-sm font-semibold text-accent hover:opacity-80 transition-colors"
                     >
                       View Full Profile →
                     </a>
@@ -344,20 +344,20 @@ function TrendingPolicyCard({ policy, index }: { policy: any; index: number }) {
           <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
             <span className="text-indigo-400 font-bold text-xs">#{index + 1}</span>
           </div>
-          <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">{t("common.interactions")}</span>
+          <span className="text-[10px] text-muted-color uppercase tracking-widest font-bold">{t("common.interactions")}</span>
         </div>
-        <div className="px-2 py-1 rounded bg-white/5 border border-white/10 text-white/60 text-[10px] font-mono">
+        <div className="px-2 py-1 rounded bg-layer-1 border border-current/10 text-muted-color text-[10px] font-mono">
           ENG: {policy.interactionScore}
         </div>
       </div>
 
-      <h3 className="font-bold text-white leading-snug line-clamp-2 min-h-[3rem]">
+      <h3 className="font-bold text-primary-color leading-snug line-clamp-2 min-h-[3rem]">
         {policy.title}
       </h3>
 
       {/* Candidate attribution */}
-      <div className="flex items-center gap-3 py-2 border-t border-white/5 mt-2">
-        <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 border border-white/10">
+      <div className="flex items-center gap-3 py-2 border-t border-current/5 mt-2">
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-layer-1 border border-current/10">
           {policy.candidateImage ? (
             <img src={policy.candidateImage} alt={policy.candidateName} className="w-full h-full object-cover" />
           ) : (
@@ -367,14 +367,14 @@ function TrendingPolicyCard({ policy, index }: { policy: any; index: number }) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-white/80 truncate">{policy.candidateName}</p>
-          <p className="text-[10px] text-white/40 truncate">
+          <p className="text-xs font-semibold text-secondary-color truncate">{policy.candidateName}</p>
+          <p className="text-[10px] text-muted-color truncate">
             {policy.candidateNickname && `"${policy.candidateNickname}"`}
           </p>
         </div>
         <a
           href={`/candidate/${policy.candidateId}/policies`}
-          className="p-2 rounded-lg bg-white/5 text-white/40 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+          className="p-2 rounded-lg bg-layer-1 text-muted-color hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
           title="See this policy"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -385,17 +385,17 @@ function TrendingPolicyCard({ policy, index }: { policy: any; index: number }) {
 
       {/* Stats Bar */}
       <div className="grid grid-cols-2 gap-2 mt-auto">
-        <div className="bg-white/5 rounded-xl p-2 flex items-center gap-2 justify-center">
+        <div className="bg-layer-1 rounded-xl p-2 flex items-center gap-2 justify-center">
           <svg className="w-3 h-3 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
           </svg>
-          <span className="text-xs font-bold text-white/80">{policy.totalLikes}</span>
+          <span className="text-xs font-bold text-secondary-color">{policy.totalLikes}</span>
         </div>
-        <div className="bg-white/5 rounded-xl p-2 flex items-center gap-2 justify-center">
+        <div className="bg-layer-1 rounded-xl p-2 flex items-center gap-2 justify-center">
           <svg className="w-3 h-3 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
           </svg>
-          <span className="text-xs font-bold text-white/80">{policy.commentCount}</span>
+          <span className="text-xs font-bold text-secondary-color">{policy.commentCount}</span>
         </div>
       </div>
     </div>
@@ -407,7 +407,7 @@ function StatBox({ value, label }: { value: number | string; label: string }) {
   return (
     <div className="text-center">
       <p className="text-2xl md:text-3xl font-bold gradient-text">{value}</p>
-      <p className="text-white/50 text-sm">{label}</p>
+      <p className="text-muted-color text-sm">{label}</p>
     </div>
   );
 }
@@ -422,8 +422,8 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
     >
       {/* Avatar with Ring */}
       <div className="relative">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[3px]">
-          <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
+        <div className="w-24 h-24 rounded-full bg-accent-gradient p-[3px]">
+          <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--bg-secondary)' }}>
             {data.imageUrl || data.photoURL ? (
               <img
                 src={data.imageUrl || data.photoURL}
@@ -439,19 +439,19 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
         </div>
 
         {/* Online Indicator */}
-        <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-[#12121a]" />
+        <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-green-500 border-2" style={{ borderColor: 'var(--bg-primary)' }} />
       </div>
 
       {/* Name & Position */}
       <div>
-        <p className="font-semibold text-lg text-white">
+        <p className="font-semibold text-lg text-primary-color">
           {data.firstname} {data.lastname}
         </p>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-muted-color">
           {data.position || `Class 4 / ${data.class}`}
         </p>
         {data.nickname && (
-          <p className="text-xs text-purple-400 mt-1">"{data.nickname}"</p>
+          <p className="text-xs text-accent mt-1">"{data.nickname}"</p>
         )}
       </div>
 
@@ -459,14 +459,14 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
       <div className="flex flex-col gap-3 w-full pt-2">
         <a
           href={`/candidate/${data.id}/policies`}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-medium text-sm hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-0.5 text-center"
+          className="w-full py-3 rounded-xl bg-accent-gradient text-white font-medium text-sm shadow-accent shadow-accent-hover transition-all duration-300 hover:-translate-y-0.5 text-center"
         >
           {t("card.view_policies")}
         </a>
 
         <a
           href={`/candidate/${data.id}/profile`}
-          className="w-full py-3 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 hover:text-white transition-all duration-300 text-center"
+          className="w-full py-3 rounded-xl border border-glass-border text-secondary-color text-sm hover:bg-layer-1 hover:text-primary-color transition-all duration-300 text-center"
         >
           {t("card.personal_profile")}
         </a>

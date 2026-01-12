@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../style/globals.css";
 import { LanguageProvider } from "@/shared/context/LanguageContext";
+import { ThemeProvider } from "@/shared/context/ThemeContext";
+import { UserProvider } from "@/shared/context/UserContext";
+import UserVerificationModal from "@/components/UserVerificationModal";
 import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
@@ -30,10 +33,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LanguageProvider>
-          {children}
-          <Analytics />
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <UserProvider>
+              {children}
+              <UserVerificationModal />
+              <Analytics />
+            </UserProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

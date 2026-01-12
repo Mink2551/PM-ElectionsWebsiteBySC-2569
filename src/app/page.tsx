@@ -3,6 +3,7 @@
 import Navbar from "@/features/navbar/navbar";
 import Countdown from "@/features/landing/components/CountDown";
 import Hero from "@/features/landing/hero";
+import ScheduleSection from "@/components/ScheduleSection";
 import Footer from "@/features/footer/Footer";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <Navbar />
       <Countdown />
       <Hero />
+      <ScheduleSection />
       <Footer />
     </div>
   );

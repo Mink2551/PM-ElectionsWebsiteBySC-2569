@@ -12,7 +12,7 @@
    CSS Custom Properties (Design Tokens)
    ============================================ */
 :root {
-  /* DARK MODE (Default - Permanent) */
+  /* DARK MODE (Default) */
   /* Background Colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #12121a;
@@ -25,7 +25,7 @@
   --text-muted: rgba(255, 255, 255, 0.5);
   
   /* Accent Gradients (SC Identity) */
-  --gradient-primary: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%); /* Darker Red */
+  --gradient-primary: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
   --gradient-accent: linear-gradient(135deg, #EC4899 0%, #F59E0B 100%);
   --gradient-countdown: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
   --gradient-button: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
@@ -49,6 +49,46 @@
   --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   --orb-opacity: 0.4;
+}
+
+/* ============================================
+   LIGHT MODE THEME
+   ============================================ */
+[data-theme="light"] {
+  /* Background Colors */
+  --bg-primary: #f8f9fc;
+  --bg-secondary: #eef1f6;
+  --bg-card: rgba(0, 0, 0, 0.03);
+  --bg-glass: rgba(255, 255, 255, 0.85);
+
+  /* Text Colors */
+  --text-primary: #1a1a2e;
+  --text-secondary: rgba(26, 26, 46, 0.7);
+  --text-muted: rgba(26, 26, 46, 0.5);
+  
+  /* Accent Gradients - SUNSET THEME for Light Mode */
+  --gradient-primary: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  --gradient-accent: linear-gradient(135deg, #FB923C 0%, #F59E0B 100%);
+  --gradient-countdown: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FBBF24 100%);
+  --gradient-button: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  
+  /* Accent Colors - Sunset */
+  --accent-primary: #F97316;
+  --accent-secondary: #EA580C;
+  
+  /* Glow Effects (Sunset for light mode) */
+  --glow-primary: 0 0 20px rgba(249, 115, 22, 0.25);
+  --glow-accent: 0 0 20px rgba(251, 146, 60, 0.25);
+  --glow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+  
+  /* Glass Effect */
+  --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+  
+  /* Layers */
+  --bg-layer-1: rgba(0, 0, 0, 0.03);
+  --bg-layer-2: rgba(0, 0, 0, 0.06);
+
+  --orb-opacity: 0.15;
 }
 
 /* ============================================
@@ -120,6 +160,93 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ============================================
+   Theme-Aware Accent Utilities
+   (Purple in Dark Mode, Sunset in Light Mode)
+   ============================================ */
+
+/* Accent Backgrounds - Theme Aware */
+.bg-accent-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+}
+[data-theme="light"] .bg-accent-gradient {
+  background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FBBF24 100%);
+}
+
+.bg-accent-gradient-simple {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+}
+[data-theme="light"] .bg-accent-gradient-simple {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+/* Accent Text Colors */
+.text-accent {
+  color: #a855f7;
+}
+[data-theme="light"] .text-accent {
+  color: #F97316;
+}
+
+/* Accent Border Colors */
+.border-accent {
+  border-color: #a855f7;
+}
+[data-theme="light"] .border-accent {
+  border-color: #F97316;
+}
+
+/* Focus Border - Theme Aware */
+.focus-accent:focus {
+  border-color: #a855f7;
+}
+[data-theme="light"] .focus-accent:focus {
+  border-color: #F97316;
+}
+
+/* Spinner - Theme Aware */
+.spinner-accent {
+  border-color: #a855f7;
+  border-top-color: transparent;
+}
+[data-theme="light"] .spinner-accent {
+  border-color: #F97316;
+  border-top-color: transparent;
+}
+
+/* Accent Glow Shadows */
+.shadow-accent {
+  box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.25);
+}
+[data-theme="light"] .shadow-accent {
+  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.25);
+}
+
+.shadow-accent-hover:hover {
+  box-shadow: 0 15px 35px -5px rgba(168, 85, 247, 0.4);
+}
+[data-theme="light"] .shadow-accent-hover:hover {
+  box-shadow: 0 15px 35px -5px rgba(249, 115, 22, 0.4);
+}
+
+/* Timeline/Progress Bar Accent */
+.bg-accent-line {
+  background: linear-gradient(to bottom, #6366f1, #a855f7, #ec4899);
+}
+[data-theme="light"] .bg-accent-line {
+  background: linear-gradient(to bottom, #F97316, #FB923C, #FBBF24);
+}
+
+/* Badge/Chip Accent */
+.bg-accent-subtle {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+}
+[data-theme="light"] .bg-accent-subtle {
+  background-color: rgba(249, 115, 22, 0.1);
+  color: #F97316;
 }
 
 /* Glow Effects */
@@ -273,6 +400,64 @@ body {
 .countdown-box:hover {
   box-shadow: var(--glow-accent);
   transform: scale(1.05);
+}
+
+/* Countdown Section Theme Styles */
+.countdown-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  background-size: 200% 200%;
+}
+
+.countdown-text {
+  color: #ffffff;
+}
+
+.countdown-text-muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.countdown-text-subtle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.countdown-glow {
+  background: linear-gradient(to top, rgba(168, 85, 247, 0.3), transparent);
+}
+
+/* Light theme countdown - Sunset colors */
+[data-theme="light"] .countdown-gradient {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);
+  background-size: 200% 200%;
+}
+
+[data-theme="light"] .countdown-text {
+  color: #ffffff;
+}
+
+[data-theme="light"] .countdown-text-muted {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme="light"] .countdown-text-subtle {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="light"] .countdown-glow {
+  background: linear-gradient(to top, rgba(249, 115, 22, 0.3), transparent);
+}
+
+/* Countdown box override for light theme */
+[data-theme="light"] .countdown-box {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="light"] .countdown-box .text-primary-color {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .countdown-box .text-secondary-color {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 /* Avatar Ring */

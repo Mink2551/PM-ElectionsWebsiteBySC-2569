@@ -9,7 +9,7 @@ const TimeBox = dynamic(() => import("./Timebox"), { ssr: false });
 // Separator component can stay normal (static)
 function Separator() {
   return (
-    <div className="hidden md:flex items-center text-white/40 text-3xl font-light">
+    <div className="hidden md:flex items-center countdown-text-muted text-3xl font-light">
       :
     </div>
   );
@@ -22,9 +22,9 @@ export default function Countdown() {
   const { days, hours, minutes, seconds } = useCountdown(targetDate);
 
   return (
-    <section className="relative w-full overflow-hidden pt-20">
-      {/* Animated Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 animate-gradient" />
+    <section className="countdown-section relative w-full overflow-hidden pt-20">
+      {/* Animated Gradient Background - uses CSS variable for theme-aware colors */}
+      <div className="absolute inset-0 countdown-gradient animate-gradient" />
 
       {/* Overlay Pattern */}
       <div className="absolute inset-0 opacity-10">
@@ -41,10 +41,10 @@ export default function Countdown() {
       <div className="relative z-10 py-12 px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <p className="text-sm tracking-[0.3em] uppercase text-white/70 mb-2">
+          <p className="text-sm tracking-[0.3em] uppercase countdown-text-muted mb-2">
             ⚡ Live Countdown
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">
+          <h2 className="text-2xl md:text-3xl font-bold countdown-text">
             Election Day Approaching
           </h2>
         </div>
@@ -61,13 +61,13 @@ export default function Countdown() {
         </div>
 
         {/* Bottom Info */}
-        <p className="text-center text-white/60 text-sm mt-8">
+        <p className="text-center countdown-text-subtle text-sm mt-8">
           Voting will open when the countdown reaches zero
         </p>
       </div>
 
       {/* Bottom Glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-32 bg-gradient-to-t from-purple-500/30 to-transparent blur-3xl" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-32 countdown-glow blur-3xl" />
     </section>
   );
 }

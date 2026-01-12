@@ -4,12 +4,16 @@ import Link from "next/link";
 import { useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import MobileMenu from "./MobileMenu";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTheme } from "@/shared/context/ThemeContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <>
@@ -19,7 +23,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <a href="/" className="flex items-center gap-2">
               {/* Logo Icon */}
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-accent-gradient flex items-center justify-center">
                 <span className="text-white font-bold text-lg">PM</span>
               </div>
 
@@ -43,7 +47,7 @@ export default function Navbar() {
           </ul>
 
           {/* RIGHT - CTA Button & Mobile Menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <a
               href="/results"
               className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 text-white font-medium text-sm hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5"
@@ -52,10 +56,23 @@ export default function Navbar() {
               {t("nav.results")}
             </a>
 
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-10 h-10 rounded-xl glass hover:bg-layer-1 transition-all duration-300 border border-white/10"
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? (
+                <LightModeIcon className="text-yellow-400 w-5 h-5" />
+              ) : (
+                <DarkModeIcon className="text-accent w-5 h-5" />
+              )}
+            </button>
+
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === "en" ? "th" : "en")}
-              className="flex items-center justify-center w-10 h-10 rounded-xl glass hover:bg-layer-1 transition-all duration-300 text-sm font-bold text-white border border-white/10"
+              className="flex items-center justify-center w-10 h-10 rounded-xl glass hover:bg-layer-1 transition-all duration-300 text-sm font-bold text-primary-color border border-white/10"
               title={language === "en" ? "Switch to Thai" : "เปลี่ยนเป็นภาษาอังกฤษ"}
             >
               {language === "en" ? "TH" : "EN"}

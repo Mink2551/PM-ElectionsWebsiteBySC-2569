@@ -208,15 +208,32 @@ export default function AdminPage() {
                 <h1 className="text-3xl font-bold gradient-text mb-2">{t("admin.title")}</h1>
                 <p className="text-muted-color">{t("admin.desc")}</p>
               </div>
-              <a
-                href="/admin/votes"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:shadow-lg hover:shadow-indigo-500/30 transition-all hover:-translate-y-0.5"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                {t("admin.votes_title")}
-              </a>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="/admin/votes"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
+                >
+                  📊 Votes
+                </a>
+                <a
+                  href="/admin/users"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-green-500/30 transition-all"
+                >
+                  👥 Users
+                </a>
+                <a
+                  href="/admin/schedule"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+                >
+                  📅 Schedule
+                </a>
+                <a
+                  href="/admin/logs"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-orange-500/30 transition-all"
+                >
+                  📜 Logs
+                </a>
+              </div>
             </div>
 
             {/* Global Settings */}
