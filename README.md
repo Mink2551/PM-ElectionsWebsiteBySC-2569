@@ -1,100 +1,83 @@
-# PM Student Council Elections 2569 🗳️
+# PM Student Board Elections 2569 🗳️
 
-> A premium, dark-themed election platform for the Student Council 2569 elections.
+> **[vote4pm.online](https://vote4pm.online)** - The official, high-performance election platform for the PM Student Board 2569.
 
-![Project Preview](./public/images/Hero.png) *Add a screenshot here if available*
+![Project Preview](./public/images/Hero.png)
 
-## 🌟 Features
+## � Overview
 
-### 🎨 Premium Design
-- **Dark Mode Enforced**: A sleek, professional dark theme (`#0a0a0f`) with SC Red and PM Pink/Yellow accents.
-- **Glassmorphism**: Modern frosted glass effects on cards, headers, and overlays.
-- **Animations**: Smooth fade-ins, hover lifts, and pulse effects for an engaging user experience.
+This platform is a high-availability, premium web application designed to facilitate transparent and engaging student elections. Built with a "Mobile-First" philosophy and a sleek dark aesthetic, it provides real-time updates, multi-language support, and comprehensive candidate profiles to ensure every voter makes an informed decision.
 
-### 🗳️ Election Features
-- **Live Results**: Real-time vote tracking with animated progress bars.
-- **Candidate Profiles**: Detailed pages with policy breakdowns, stats, and biographies.
-- **Policy Interaction**: Like/Dislike system for candidate policies with persistent state.
-- **Countdown Timer**: 2x2 responsive countdown grid leading up to election day.
+## 🌟 Key Features
 
-### 📱 Responsive & Accessible
-- **Mobile First**: Fully responsive layout with a custom mobile sidebar.
-- **Cross-Platform**: Optimized for desktop, tablet, and mobile devices.
-- **Accessible Navigation**: Clear navigation with hash links (`/#candidates`) for seamless browsing.
+### 🚀 Performance & UI
+- **Next.js 15 App Router**: Optimized for speed and SEO.
+- **Permanent Dark Theme**: A high-contrast `#0a0a0f` aesthetic tailored for premium readability.
+- **Glassmorphic Interactive UI**: Frosted glass effects and micro-animations for an immersive experience.
+- **Responsive Design**: Seamlessly transitions from high-resolution desktop displays to hand-held devices.
 
-### 🛡️ Admin Dashboard
-- **Secure Access**: Password-protected admin area.
-- **Candidate Management**: Add, remove, and update candidates.
-- **Image Cropper**: Integrated pan-and-zoom tool for perfect candidate photo uploads.
-- **Vote Management**: Manual vote adjustment capabilities.
-- **Live Config**: Toggle Facebook Live streams directly from the admin panel.
+### �️ Election Infrastructure
+- **Live Multilingual Support**: Built-in support for **Thai (Default)** and **English**, managed via a global context.
+- **Real-Time Results Engine**: Live vote tracking with real-time percentages and animated progress bars via Firebase.
+- **Candidate Ecosystem**: Comprehensive profile pages featuring biographies, policies, and a community "Like" system.
+- **Abstain Voting**: Official support for "Abstain" (ไม่ประสงค์ลงคะแนน) votes, integrated into global statistics.
+- **Dynamic Countdown**: A precise countdown engine to build anticipation for election day.
 
-### 📸 Dynamic Media
-- **Base64 Image Storage**: Candidate images stored directly in database for zero-config setup.
-- **Live Stream Integration**: Embed Facebook Live videos on the home page instantly.
+### 🛡️ Administrative Suite
+- **Secure Management**: Protected admin gateway for election supervisors.
+- **Unified Candidate Management**: Full CRUD operations for candidates with an integrated **Image Cropper** (Base64 optimized).
+- **Vote Audit Tool**: Manual vote adjustment capabilities for verified tallying.
+- **Broadcast Integration**: Instantly embed and toggle Facebook Live streams via the admin panel.
 
-## 🛠️ Tech Stack
+## 🛠️ Technical Implementation
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + Custom CSS Variables
-- **Language**: TypeScript
-- **State Persistence**: `js-cookie`
-- **Icons**: Material UI Icons
-- **Deployment**: Vercel (Recommended)
+- **Framework**: [Next.js 15.1+](https://nextjs.org/)
+- **Styling**: [Tailwind CSS 4.0+](https://tailwindcss.com/)
+- **Runtime**: [TypeScript](https://www.typescriptlang.org/)
+- **Database/Backend**: [Firebase Firestore](https://firebase.google.com/products/firestore)
+- **Analytics**: [Vercel Analytics](https://vercel.com/analytics)
+- **Client State**: React Context API & `js-cookie`
 
-## 🚀 Getting Started
+## 🚀 Deployment & Setup
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/Mink2551/PM-ElectionsWebsiteBySC-2569.git
-    cd PM-ElectionsWebsiteBySC-2569
-    ```
-
-2.  **Install dependencies**
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-
-3.  **Run the development server**
-    ```bash
-    npm run dev
-    ```
-
-4.  **Open in Browser**
-    Visit `http://localhost:3000` to see the application.
-
-## 📂 Project Structure
-
-```bash
-src/
-├── app/              # Next.js App Router pages
-├── components/       # Shared UI components
-├── context/          # React Contexts (e.g., Theme - *Removed in v2*)
-├── features/         # Feature-specific components (Landing, Navbar, Footer)
-├── hooks/            # Custom hooks (useCountdown, etc.)
-└── style/            # Global styles and Tailwind directives
+### Configuration
+The application requires a Firebase project. Create a `.env.local` file with your credentials:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
-## 🎨 Color Palette
+### Installation
+```bash
+# Clone and enter
+git clone https://github.com/Mink2551/PM-ElectionsWebsiteBySC-2569.git
+cd PM-ElectionsWebsiteBySC-2569
 
-| Color | Hex | Usage |
-|-------|-----|-------|
-| **Background** | `#0a0a0f` | Main background |
-| **SC Red** | `#EF4444` | Primary actions, gradients |
-| **PM Pink** | `#EC4899` | Accents, gradients |
-| **PM Yellow** | `#F59E0B` | Accents, highlights |
-| **Text** | `#FFFFFF` | Primary text |
+# Install & Run
+npm install
+npm run dev
+```
 
-## 🤝 Contributing
+### Production Domain
+The platform is optimized for and hosted at:
+👉 **[https://vote4pm.online](https://vote4pm.online)**
 
-1.  Fork the project
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+## 🎨 Design System
+
+| Layer | Hex | Purpose |
+|-------|-----|---------|
+| **Core Background** | `#0a0a0f` | Primary canvas |
+| **Identity Red** | `#EF4444` | Student Board primary identity |
+| **Accent Pink** | `#EC4899` | CTA and focus elements |
+| **Accent Yellow** | `#F59E0B` | Warning and highlight states |
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is open-source and available under the **MIT License**.
+
+---
+*Developed with ❤️ by the Student Board Technical Team.*
