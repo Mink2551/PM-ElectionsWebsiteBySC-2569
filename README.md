@@ -2,7 +2,7 @@
 
 > A premium, dark-themed election platform for the Student Council 2569 elections.
 
-![Project Preview](/public/hero.png) *Add a screenshot here if available*
+![Project Preview](./public/images/Hero.png) *Add a screenshot here if available*
 
 ## 🌟 Features
 
@@ -23,7 +23,7 @@
 - **Accessible Navigation**: Clear navigation with hash links (`/#candidates`) for seamless browsing.
 
 ### 🛡️ Admin Dashboard
-- **Secure Access**: Password-protected admin area (`scadmin1234`).
+- **Secure Access**: Password-protected admin area.
 - **Candidate Management**: Add, remove, and update candidates.
 - **Image Cropper**: Integrated pan-and-zoom tool for perfect candidate photo uploads.
 - **Vote Management**: Manual vote adjustment capabilities.
