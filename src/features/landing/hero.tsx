@@ -226,7 +226,7 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
           {data.firstname} {data.lastname}
         </p>
         <p className="text-sm text-white/50">
-          {data.position || `Class ${data.class}`}
+          {data.position || `Class 4 / ${data.class}`}
         </p>
         {data.nickname && (
           <p className="text-xs text-purple-400 mt-1">"{data.nickname}"</p>
