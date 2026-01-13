@@ -29,6 +29,7 @@ export default function AdminPage() {
 
   // Settings State
   const [liveUrl, setLiveUrl] = useState("");
+  const [countdownDate, setCountdownDate] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Fetch candidates and settings
@@ -43,6 +44,11 @@ export default function AdminPage() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setLiveUrl(docSnap.data().liveUrl || "");
+        if (docSnap.data().countdownDate) {
+          // Convert Firestore ISO string to datetime-local format
+          const date = new Date(docSnap.data().countdownDate);
+          setCountdownDate(date.toISOString().slice(0, 16));
+        }
       }
     } catch (e) {
       console.error("Error fetching settings:", e);
@@ -54,7 +60,8 @@ export default function AdminPage() {
     setSavingSettings(true);
     try {
       await setDoc(doc(db, "settings", "config"), {
-        liveUrl
+        liveUrl,
+        countdownDate: countdownDate ? new Date(countdownDate).toISOString() : null
       }, { merge: true });
       alert("Settings saved!");
     } catch (e) {
@@ -275,6 +282,37 @@ export default function AdminPage() {
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-red-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50"
                 >
                   {savingSettings ? t("admin.saving") : t("admin.update_link")}
+                </button>
+              </form>
+            </div>
+
+            {/* Countdown Date Settings */}
+            <div className="glass-card rounded-2xl p-6 mb-8 animate-fadeInUp">
+              <h2 className="text-xl font-semibold text-primary-color mb-6 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-sm text-white">
+                  ⏱️
+                </span>
+                Countdown Settings
+              </h2>
+              <form onSubmit={handleSaveSettings} className="flex flex-col md:flex-row gap-4 md:items-end">
+                <div className="flex-1">
+                  <label className="block text-sm text-secondary-color mb-2">Election Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
+                    value={countdownDate}
+                    onChange={(e) => setCountdownDate(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-color mt-1">
+                    This date will be used for the countdown timer on the homepage
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="px-6 py-3 rounded-xl my-auto bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  {savingSettings ? t("admin.saving") : "Save Date"}
                 </button>
               </form>
             </div>

@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export function useCountdown(targetDate: Date) {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
-
-  function getTimeLeft() {
+  const getTimeLeft = useCallback(() => {
     const now = new Date().getTime();
     const target = targetDate.getTime();
     const diff = target - now;
@@ -23,15 +21,20 @@ export function useCountdown(targetDate: Date) {
       minutes: Math.floor((diff / (1000 * 60)) % 60),
       seconds: Math.floor((diff / 1000) % 60),
     };
-  }
+  }, [targetDate]);
+
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
 
   useEffect(() => {
+    // Update immediately when targetDate changes
+    setTimeLeft(getTimeLeft());
+
     const timer = setInterval(() => {
       setTimeLeft(getTimeLeft());
     }, 1000); // Update every second for smooth countdown
 
     return () => clearInterval(timer);
-  }, []);
+  }, [getTimeLeft]);
 
   return timeLeft;
 }

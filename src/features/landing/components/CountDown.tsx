@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useCountdown } from "../hooks/useCountdown";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 // Dynamically import TimeBox to disable SSR
 const TimeBox = dynamic(() => import("./Timebox"), { ssr: false });
@@ -15,9 +18,30 @@ function Separator() {
   );
 }
 
+// Default election date: 28/01/2569 (2026) at 10:00 AM
+const DEFAULT_ELECTION_DATE = new Date("2026-01-28T10:00:00");
+
 export default function Countdown() {
-  // Election date: 28/01/2569 (2026) at 10:00 AM
-  const targetDate = new Date("2026-01-28T10:00:00");
+  const [targetDate, setTargetDate] = useState<Date>(DEFAULT_ELECTION_DATE);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch countdown date from Firestore
+  useEffect(() => {
+    const fetchCountdownDate = async () => {
+      try {
+        const docRef = doc(db, "settings", "config");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().countdownDate) {
+          setTargetDate(new Date(docSnap.data().countdownDate));
+        }
+      } catch (e) {
+        console.error("Error fetching countdown date:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCountdownDate();
+  }, []);
 
   const { days, hours, minutes, seconds } = useCountdown(targetDate);
 
@@ -51,13 +75,13 @@ export default function Countdown() {
 
         {/* Countdown Boxes */}
         <div className="grid grid-cols-2 md:flex justify-center items-center gap-3 md:gap-6">
-          <TimeBox label="Days" value={days} />
+          <TimeBox label="Days" value={loading ? 0 : days} />
           <Separator />
-          <TimeBox label="Hours" value={hours} />
+          <TimeBox label="Hours" value={loading ? 0 : hours} />
           <Separator />
-          <TimeBox label="Minutes" value={minutes} />
+          <TimeBox label="Minutes" value={loading ? 0 : minutes} />
           <Separator />
-          <TimeBox label="Seconds" value={seconds} />
+          <TimeBox label="Seconds" value={loading ? 0 : seconds} />
         </div>
 
         {/* Bottom Info */}

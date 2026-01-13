@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
+import ImageCropper from "@/components/ImageCropper";
 
 interface Policy {
   title: string;
@@ -25,6 +26,11 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
   const [newDescription, setNewDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Image editing state
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [savingImage, setSavingImage] = useState(false);
+
   useEffect(() => {
     async function loadCandidate() {
       try {
@@ -41,6 +47,50 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
     }
     loadCandidate();
   }, [candidateId]);
+
+  // Handle file selection for image edit
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+        setShowCropper(true);
+      };
+      reader.readAsDataURL(e.target.files[0]);
+      e.target.value = ''; // Reset input
+    }
+  };
+
+  // Convert Blob to Base64
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  // Handle crop complete - save to Firestore
+  const handleCropComplete = async (blob: Blob) => {
+    setShowCropper(false);
+    setSavingImage(true);
+
+    try {
+      const imageUrl = await blobToBase64(blob);
+      const ref = doc(db, "candidates", candidateId);
+      await updateDoc(ref, { imageUrl });
+
+      setCandidate((prev: any) => ({ ...prev, imageUrl }));
+      setImagePreview(null);
+      alert("Image updated successfully!");
+    } catch (error) {
+      console.error("Error updating image:", error);
+      alert("Error updating image");
+    } finally {
+      setSavingImage(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -144,14 +194,58 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
               Back to Admin
             </a>
 
-            {/* Header */}
+            {/* Header with Image Edit */}
             <div className="mb-8 animate-fadeInUp">
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Edit Policies
-              </h1>
-              <p className="text-white/50">
-                {candidate.firstname} {candidate.lastname} • {Object.keys(policies).length} policies
-              </p>
+              <div className="flex items-start gap-6 mb-4">
+                {/* Candidate Image - Editable */}
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[3px] shrink-0">
+                    <div className="w-full h-full rounded-full bg-[#12121a] flex items-center justify-center overflow-hidden">
+                      {candidate.imageUrl ? (
+                        <img src={candidate.imageUrl} alt={candidate.firstname} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-bold text-2xl gradient-text">{candidate.firstname?.[0]}</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Edit Overlay */}
+                  <label className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      disabled={savingImage}
+                    />
+                    {savingImage ? (
+                      <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    ) : (
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                  </label>
+                </div>
+
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-1">
+                    Edit Candidate
+                  </h1>
+                  <p className="text-white/50">
+                    {candidate.firstname} {candidate.lastname} • Class {candidate.class}
+                  </p>
+                  <p className="text-xs text-white/30 mt-1">
+                    Hover over photo to change image
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Policies Section Header */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-1 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500"></span>
+              <h2 className="text-xl font-semibold text-white">Policies ({Object.keys(policies).length})</h2>
             </div>
 
             {/* Existing Policies */}
@@ -239,8 +333,21 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
           </div>
         </main>
 
+        {/* Image Cropper Modal */}
+        {showCropper && imagePreview && (
+          <ImageCropper
+            imageSrc={imagePreview}
+            onCancel={() => {
+              setShowCropper(false);
+              setImagePreview(null);
+            }}
+            onCropComplete={handleCropComplete}
+          />
+        )}
+
         <Footer />
       </div>
     </AdminGuard>
   );
 }
+
