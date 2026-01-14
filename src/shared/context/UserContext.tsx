@@ -97,6 +97,55 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return () => unsubscribe();
     }, [user?.studentId]);
 
+    // Heartbeat: Update lastActive - every 5 seconds if focused, every 2 minutes otherwise
+    useEffect(() => {
+        if (!user?.studentId || isBlocked) return;
+
+        let interval: NodeJS.Timeout | null = null;
+        let isFocused = false;
+
+        const updateLastActive = async () => {
+            try {
+                const { updateDoc, getDoc } = await import("firebase/firestore");
+
+                // Check if user is being focused (monitored)
+                const userDoc = await getDoc(doc(db, "users", user.studentId));
+                if (userDoc.exists()) {
+                    isFocused = userDoc.data()?.isFocused || false;
+                }
+
+                await updateDoc(doc(db, "users", user.studentId), {
+                    lastActive: new Date().toISOString(),
+                });
+            } catch (e) {
+                console.error("Error updating lastActive:", e);
+            }
+        };
+
+        const startHeartbeat = async () => {
+            // Update immediately when user loads the page
+            await updateLastActive();
+
+            // Set interval based on focus status - check every iteration
+            const runHeartbeat = async () => {
+                await updateLastActive();
+
+                // Clear existing interval and set new one based on focus status
+                if (interval) clearInterval(interval);
+                interval = setInterval(runHeartbeat, isFocused ? 5 * 1000 : 2 * 60 * 1000);
+            };
+
+            // Start with default 2 minute interval, will adjust based on focus status
+            interval = setInterval(runHeartbeat, isFocused ? 5 * 1000 : 2 * 60 * 1000);
+        };
+
+        startHeartbeat();
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [user?.studentId, isBlocked]);
+
     const registerUser = async (studentId: string, nickname: string) => {
         // Check if user already exists and is blocked
         try {

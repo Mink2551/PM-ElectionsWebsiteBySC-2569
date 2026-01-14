@@ -23,6 +23,7 @@ interface User {
     lastActive?: string;
     isBlocked: boolean;
     blockReason?: string;
+    isFocused?: boolean;
 }
 
 export default function AdminUsersPage() {
@@ -105,10 +106,49 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleFocus = async (userId: string, currentlyFocused: boolean) => {
+        try {
+            await updateDoc(doc(db, "users", userId), {
+                isFocused: !currentlyFocused
+            });
+            setUsers(prev => prev.map(u =>
+                u.studentId === userId
+                    ? { ...u, isFocused: !currentlyFocused }
+                    : u
+            ));
+            // Also update detailUser if it's the same user
+            if (detailUser?.studentId === userId) {
+                setDetailUser({ ...detailUser, isFocused: !currentlyFocused });
+            }
+        } catch (error) {
+            console.error("Error toggling focus:", error);
+            alert("Failed to toggle focus");
+        }
+    };
+
     const filteredUsers = users.filter(u =>
         u.studentId.includes(searchTerm) ||
         u.nickname.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Helper function to determine activity status based on lastActive
+    const getActivityStatus = (lastActive?: string) => {
+        if (!lastActive) return { status: "Offline", color: "gray", isOnline: false };
+
+        const lastActiveDate = new Date(lastActive);
+        const now = new Date();
+        const diffMinutes = (now.getTime() - lastActiveDate.getTime()) / (1000 * 60);
+
+        if (diffMinutes < 5) {
+            return { status: "Online", color: "green", isOnline: true };
+        } else if (diffMinutes < 15) {
+            return { status: "Away", color: "yellow", isOnline: false };
+        } else {
+            return { status: "Offline", color: "gray", isOnline: false };
+        }
+    };
+
+    const onlineCount = users.filter(u => !u.isBlocked && getActivityStatus(u.lastActive).isOnline).length;
 
     return (
         <AdminGuard>
@@ -137,6 +177,10 @@ export default function AdminUsersPage() {
                                 <div className="glass-card rounded-xl px-4 py-2 text-center">
                                     <p className="text-2xl font-bold gradient-text">{users.length}</p>
                                     <p className="text-xs text-muted-color">Total Users</p>
+                                </div>
+                                <div className="glass-card rounded-xl px-4 py-2 text-center">
+                                    <p className="text-2xl font-bold text-green-400">{onlineCount}</p>
+                                    <p className="text-xs text-muted-color">Online</p>
                                 </div>
                                 <div className="glass-card rounded-xl px-4 py-2 text-center">
                                     <p className="text-2xl font-bold text-red-400">{users.filter(u => u.isBlocked).length}</p>
@@ -177,6 +221,7 @@ export default function AdminUsersPage() {
                                                 <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">IP</th>
                                                 <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Registered</th>
                                                 <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Status</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Focus</th>
                                                 <th className="px-4 py-4 text-right text-xs font-medium text-muted-color uppercase tracking-wider">Actions</th>
                                             </tr>
                                         </thead>
@@ -213,10 +258,25 @@ export default function AdminUsersPage() {
                                                             <span className="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-medium">
                                                                 Blocked
                                                             </span>
-                                                        ) : (
-                                                            <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">
-                                                                Active
+                                                        ) : (() => {
+                                                            const activity = getActivityStatus(user.lastActive);
+                                                            return (
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${activity.color === 'green' ? 'bg-green-500/20 text-green-400' :
+                                                                    activity.color === 'yellow' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                                        'bg-gray-500/20 text-gray-400'
+                                                                    }`}>
+                                                                    {activity.status}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        {user.isFocused ? (
+                                                            <span className="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-medium animate-pulse">
+                                                                🔴 Tracking
                                                             </span>
+                                                        ) : (
+                                                            <span className="text-xs text-muted-color">—</span>
                                                         )}
                                                     </td>
                                                     <td className="px-4 py-4 text-right">
@@ -342,11 +402,17 @@ export default function AdminUsersPage() {
                                                 <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium">
                                                     Blocked
                                                 </span>
-                                            ) : (
-                                                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">
-                                                    Active
-                                                </span>
-                                            )}
+                                            ) : (() => {
+                                                const activity = getActivityStatus(detailUser.lastActive);
+                                                return (
+                                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${activity.color === 'green' ? 'bg-green-500/20 text-green-400' :
+                                                        activity.color === 'yellow' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                            'bg-gray-500/20 text-gray-400'
+                                                        }`}>
+                                                        {activity.status}
+                                                    </span>
+                                                );
+                                            })()}
                                         </div>
                                         {detailUser.blockReason && (
                                             <div>
@@ -419,12 +485,36 @@ export default function AdminUsersPage() {
                                 </div>
                             </div>
 
+                            {/* Focus Mode Toggle */}
+                            <div className="bg-layer-1 rounded-xl p-4 mt-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-primary-color">Real-time Tracking</h4>
+                                        <p className="text-xs text-muted-color mt-1">
+                                            {detailUser.isFocused
+                                                ? "🔴 Tracking every 5 seconds"
+                                                : "Updates every 2 minutes"
+                                            }
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleFocus(detailUser.studentId, detailUser.isFocused || false)}
+                                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${detailUser.isFocused
+                                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse'
+                                                : 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
+                                            }`}
+                                    >
+                                        {detailUser.isFocused ? '🔴 Stop Tracking' : '👁️ Start Focus'}
+                                    </button>
+                                </div>
+                            </div>
+
                             <button
                                 onClick={() => {
                                     setShowDetailModal(false);
                                     setDetailUser(null);
                                 }}
-                                className="w-full mt-6 py-3 rounded-xl border border-glass-border text-secondary-color hover:bg-layer-1 transition-colors"
+                                className="w-full mt-4 py-3 rounded-xl border border-glass-border text-secondary-color hover:bg-layer-1 transition-colors"
                             >
                                 Close
                             </button>
