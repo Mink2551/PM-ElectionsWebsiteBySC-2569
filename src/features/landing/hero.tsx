@@ -440,7 +440,7 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
 
         {/* Candidate Number Badge - Bottom Center */}
         {data.candidateNumber && (
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg border-2" style={{ borderColor: 'var(--bg-primary)' }}>
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-orange-500/30 border-2" style={{ borderColor: 'var(--bg-primary)' }}>
             {data.candidateNumber}
           </div>
         )}

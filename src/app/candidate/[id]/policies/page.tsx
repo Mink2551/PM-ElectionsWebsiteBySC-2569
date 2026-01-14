@@ -331,9 +331,9 @@ function PolicyCard({
       </div>
 
       {/* Description */}
-      <p className="text-secondary-color text-sm leading-relaxed mb-6 line-clamp-3 flex-1">
+      <div className="text-secondary-color text-sm leading-relaxed mb-6 flex-1 max-h-24 overflow-y-auto pr-1">
         {policy.description}
-      </p>
+      </div>
 
       {/* Stats Row */}
       <div className="flex items-center gap-3 mb-4">
