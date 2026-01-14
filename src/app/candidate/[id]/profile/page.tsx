@@ -23,7 +23,7 @@ interface Candidate {
   birthday?: string;          // เกิดวันที่
   bloodType?: string;         // หมู่เลือด
   hobbies?: string[];         // งานอดิเรก (array)
-  achievements?: string;      // ผลงาน
+  achievements?: string[] | string;  // ผลงาน (array or legacy string)
   instagram?: string;         // Instagram ส่วนตัว
   educationHistory?: {        // ประวัติการศึกษา
     prevSchool?: string;
@@ -247,10 +247,28 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
 
                 {/* Achievements */}
                 {candidate.achievements && (
-                  <div className="p-4 rounded-xl bg-layer-1">
-                    <p className="text-xs text-muted-color uppercase tracking-wider mb-2">{labels.achievements}</p>
-                    <p className="text-secondary-color leading-relaxed whitespace-pre-line">{candidate.achievements}</p>
-                  </div>
+                  (() => {
+                    // Handle both string (legacy) and array formats
+                    const achievementsList = Array.isArray(candidate.achievements)
+                      ? candidate.achievements
+                      : candidate.achievements.split(",").map(a => a.trim()).filter(a => a);
+
+                    if (achievementsList.length === 0) return null;
+
+                    return (
+                      <div className="p-4 rounded-xl bg-layer-1">
+                        <p className="text-xs text-muted-color uppercase tracking-wider mb-2">{labels.achievements}</p>
+                        <ul className="space-y-1">
+                          {achievementsList.map((achievement: string, i: number) => (
+                            <li key={i} className="text-secondary-color leading-relaxed flex items-start gap-2">
+                              <span className="text-purple-400 mt-1">•</span>
+                              {achievement}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })()
                 )}
 
                 {/* Education History */}

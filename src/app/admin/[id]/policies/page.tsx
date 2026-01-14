@@ -27,6 +27,11 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
   const [newDescription, setNewDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Editing policy state
+  const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
   // Image editing state
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
@@ -98,7 +103,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
         birthday: profileData.birthday || null,
         bloodType: profileData.bloodType || null,
         hobbies: profileData.hobbies ? profileData.hobbies.split(",").map(h => h.trim()).filter(h => h) : [],
-        achievements: profileData.achievements || null,
+        achievements: profileData.achievements ? profileData.achievements.split(",").map(a => a.trim()).filter(a => a) : [],
         instagram: profileData.instagram || null,
         educationHistory: {
           prevSchool: profileData.prevSchool || null,
@@ -260,6 +265,53 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
     } catch (error) {
       console.error("Error deleting policy:", error);
       alert("Error deleting policy");
+    }
+  };
+
+  const startEditPolicy = (policyId: string, policy: any) => {
+    setEditingPolicyId(policyId);
+    setEditTitle(policy.title);
+    setEditDescription(policy.description);
+  };
+
+  const cancelEditPolicy = () => {
+    setEditingPolicyId(null);
+    setEditTitle("");
+    setEditDescription("");
+  };
+
+  const saveEditPolicy = async () => {
+    if (!editingPolicyId || !editTitle.trim() || !editDescription.trim()) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    try {
+      const ref = doc(db, "candidates", candidateId);
+      await updateDoc(ref, {
+        [`policies.${editingPolicyId}.title`]: editTitle,
+        [`policies.${editingPolicyId}.description`]: editDescription,
+      });
+
+      setCandidate((prev: any) => ({
+        ...prev,
+        policies: {
+          ...prev.policies,
+          [editingPolicyId]: {
+            ...prev.policies[editingPolicyId],
+            title: editTitle,
+            description: editDescription,
+          },
+        },
+      }));
+
+      const candidateName = `${candidate.firstname} ${candidate.lastname}`;
+      await logAdminAction("update_policy", `${candidateName} - ${editTitle}`, "Updated policy");
+
+      cancelEditPolicy();
+    } catch (error) {
+      console.error("Error updating policy:", error);
+      alert("Error updating policy");
     }
   };
 
@@ -565,29 +617,77 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
                     className="glass-card rounded-xl p-5 card-hover animate-fadeInUp"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-sm">
-                            {index + 1}
-                          </span>
-                          <h3 className="font-semibold text-white">{policy.title}</h3>
+                    {editingPolicyId === id ? (
+                      // Edit Mode
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm text-white/70 mb-2">Policy Title</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                          />
                         </div>
-                        <p className="text-sm text-white/60 ml-11">{policy.description}</p>
-                        <p className="text-xs text-pink-400 ml-11 mt-2">
-                          ❤️ {policy.likes || 0} likes
-                        </p>
+                        <div>
+                          <label className="block text-sm text-white/70 mb-2">Description</label>
+                          <textarea
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors h-24 resize-none"
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={saveEditPolicy}
+                            className="flex-1 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:shadow-lg transition-all"
+                          >
+                            Save Changes
+                          </button>
+                          <button
+                            onClick={cancelEditPolicy}
+                            className="px-4 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
+                    ) : (
+                      // View Mode
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-sm">
+                              {index + 1}
+                            </span>
+                            <h3 className="font-semibold text-white">{policy.title}</h3>
+                          </div>
+                          <p className="text-sm text-white/60 ml-11">{policy.description}</p>
+                          <p className="text-xs text-pink-400 ml-11 mt-2">
+                            ❤️ {policy.likes || 0} likes
+                          </p>
+                        </div>
 
-                      <button
-                        onClick={() => deletePolicy(id)}
-                        className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
+                        <div className="flex gap-1 shrink-0">
+                          <button
+                            onClick={() => startEditPolicy(id, policy)}
+                            className="p-2 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => deletePolicy(id)}
+                            className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
