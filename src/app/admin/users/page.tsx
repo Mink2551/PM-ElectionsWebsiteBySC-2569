@@ -8,6 +8,7 @@ import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import Link from "next/link";
+import { logAdminAction } from "@/lib/adminLogger";
 
 interface User {
     studentId: string;
@@ -81,6 +82,13 @@ export default function AdminUsersPage() {
                     ? { ...u, isBlocked: true, blockReason: fullBlockReason }
                     : u
             ));
+
+            await logAdminAction(
+                "block_user",
+                userId,
+                `Reason: ${fullBlockReason}`
+            );
+
             setShowBlockModal(false);
             setBlockReason("");
             setSelectedUser(null);
@@ -101,6 +109,12 @@ export default function AdminUsersPage() {
                     ? { ...u, isBlocked: false, blockReason: "" }
                     : u
             ));
+
+            await logAdminAction(
+                "unblock_user",
+                userId,
+                "Unblocked by admin"
+            );
         } catch (error) {
             console.error("Error unblocking user:", error);
             alert("Failed to unblock user");
@@ -112,6 +126,7 @@ export default function AdminUsersPage() {
 
         try {
             await deleteDoc(doc(db, "users", userId));
+            await logAdminAction("delete_user", userId, "Deleted by admin");
             setUsers(prev => prev.filter(u => u.studentId !== userId));
         } catch (error) {
             console.error("Error deleting user:", error);

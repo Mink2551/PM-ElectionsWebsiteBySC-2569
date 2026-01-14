@@ -32,6 +32,7 @@ interface Candidate {
     currentGrade?: string;
   };
   motivation?: string;        // ทำไมถึงสมัครประธานนักเรียน
+  reels?: string[];           // Instagram Reels / Interviews
 }
 
 export default function CandidateProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -318,6 +319,39 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
               </a>
             </div>
           </div>
+
+          {/* Instagram Reels / Interviews Section */}
+          {(candidate.reels && candidate.reels.length > 0) && (
+            <div className="mt-8 animate-fadeInUp" style={{ animationDelay: "100ms" }}>
+              <h2 className="text-xl font-semibold text-primary-color mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 rounded-full bg-gradient-to-b from-pink-500 to-purple-500"></span>
+                Campaign Highlights
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {candidate.reels.map((url: string, index: number) => {
+                  let embedUrl = url;
+                  // Simple extract for embed logic: append /embed if instagram link
+                  if (url.includes('instagram.com')) {
+                    const cleanUrl = url.split('?')[0];
+                    embedUrl = cleanUrl.endsWith('/') ? `${cleanUrl}embed` : `${cleanUrl}/embed`;
+                  }
+
+                  return (
+                    <div key={index} className="glass-card rounded-2xl overflow-hidden aspect-[9/16] relative group">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full object-cover"
+                        frameBorder="0"
+                        allowFullScreen
+                        scrolling="no"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Policies Preview */}
           {candidate.policies && Object.keys(candidate.policies).length > 0 && (

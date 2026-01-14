@@ -7,6 +7,7 @@ import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { logAdminAction } from "@/lib/adminLogger";
 
 interface Candidate {
     id: string;
@@ -74,6 +75,13 @@ export default function VotesAdminPage() {
             }
 
             await setDoc(ref, { abstain: newVal }, { merge: true });
+
+            await logAdminAction(
+                "update_abstain",
+                "Abstain Votes",
+                `Action: ${action}, Value: ${action === 'set' ? value : (action === 'increment' ? '+1' : '-1')} (New Total: ${newVal})`
+            );
+
             setAbstainVotes(newVal);
         } catch (error) {
             console.error("Error updating abstain votes:", error);
@@ -95,6 +103,13 @@ export default function VotesAdminPage() {
                     votes: increment(action === "increment" ? 1 : -1)
                 });
             }
+
+            const candidateName = candidates.find(c => c.id === id)?.firstname || id;
+            await logAdminAction(
+                "update_votes",
+                `Candidate ${candidateName}`,
+                `Action: ${action}, Value: ${action === 'set' ? value : (action === 'increment' ? '+1' : '-1')}`
+            );
 
             // Optimistic update
             setCandidates(prev => prev.map(c => {

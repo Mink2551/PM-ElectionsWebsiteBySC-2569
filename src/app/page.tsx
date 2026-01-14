@@ -3,6 +3,7 @@
 import Navbar from "@/features/navbar/navbar";
 import Countdown from "@/features/landing/components/CountDown";
 import Hero from "@/features/landing/hero";
+import ReelsSection from "@/components/ReelsSection";
 import ScheduleSection from "@/components/ScheduleSection";
 import Footer from "@/features/footer/Footer";
 
@@ -12,6 +13,7 @@ export default function Home() {
       <Navbar />
       <Countdown />
       <Hero />
+      <ReelsSection />
       <ScheduleSection />
       <Footer />
     </div>

@@ -7,6 +7,7 @@ import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
 import ImageCropper from "@/components/ImageCropper";
+import { logAdminAction } from "@/lib/adminLogger";
 
 interface Policy {
   title: string;
@@ -45,6 +46,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
     currentSchool: "",
     currentGrade: "",
     motivation: "",
+    reels: [] as string[],
   });
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -71,6 +73,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
             currentSchool: data.educationHistory?.currentSchool || "",
             currentGrade: data.educationHistory?.currentGrade || "",
             motivation: data.motivation || "",
+            reels: data.reels || [],
           });
         }
       } catch (error) {
@@ -102,7 +105,12 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
           currentGrade: profileData.currentGrade || null,
         },
         motivation: profileData.motivation || null,
+        reels: profileData.reels || [],
       });
+
+      const candidateName = `${candidate.firstname} ${candidate.lastname}`;
+      await logAdminAction("update_candidate", candidateName, "Updated extended profile information");
+
       alert("Profile saved successfully!");
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -144,6 +152,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
       const imageUrl = await blobToBase64(blob);
       const ref = doc(db, "candidates", candidateId);
       await updateDoc(ref, { imageUrl });
+
+      const candidateName = `${candidate.firstname} ${candidate.lastname}`;
+      await logAdminAction("update_candidate", candidateName, "Updated profile image");
 
       setCandidate((prev: any) => ({ ...prev, imageUrl }));
       setImagePreview(null);
@@ -213,6 +224,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
         },
       }));
 
+      const candidateName = `${candidate.firstname} ${candidate.lastname}`;
+      await logAdminAction("create_policy", `${candidateName} - ${newTitle}`, "Added new policy");
+
       setNewTitle("");
       setNewDescription("");
     } catch (error) {
@@ -237,6 +251,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
         delete updated[policyId];
         return { ...prev, policies: updated };
       });
+
+      const candidateName = `${candidate.firstname} ${candidate.lastname}`;
+      await logAdminAction("delete_policy", `${candidateName} (Policy ID: ${policyId})`, "Deleted policy");
     } catch (error) {
       console.error("Error deleting policy:", error);
       alert("Error deleting policy");
@@ -458,6 +475,46 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
                     onChange={(e) => setProfileData({ ...profileData, motivation: e.target.value })}
                     placeholder="Explain the candidate's motivation for running..."
                   />
+                </div>
+
+                {/* Instagram Reels */}
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">Instagram Reels / Interview Clips (Links)</label>
+                  <p className="text-xs text-white/50 mb-3">Add links to Instagram Reels or video clips. These will be shown on the profile and home page.</p>
+
+                  <div className="space-y-3">
+                    {profileData.reels.map((url, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                          value={url}
+                          onChange={(e) => {
+                            const newReels = [...profileData.reels];
+                            newReels[index] = e.target.value;
+                            setProfileData({ ...profileData, reels: newReels });
+                          }}
+                          placeholder="https://www.instagram.com/reel/..."
+                        />
+                        <button
+                          onClick={() => {
+                            const newReels = profileData.reels.filter((_, i) => i !== index);
+                            setProfileData({ ...profileData, reels: newReels });
+                          }}
+                          className="px-4 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      onClick={() => setProfileData({ ...profileData, reels: [...profileData.reels, ""] })}
+                      className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1"
+                    >
+                      <span className="text-lg">+</span> Add another link
+                    </button>
+                  </div>
                 </div>
 
                 {/* Save Button */}

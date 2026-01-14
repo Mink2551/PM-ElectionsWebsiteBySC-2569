@@ -8,6 +8,7 @@ import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
 import ImageCropper from "@/components/ImageCropper";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { logAdminAction } from "@/lib/adminLogger";
 
 interface Candidate {
   id: string;
@@ -64,6 +65,7 @@ export default function AdminPage() {
         liveUrl,
         countdownDate: countdownDate ? new Date(countdownDate).toISOString() : null
       }, { merge: true });
+      await logAdminAction("update_live_settings", "Global Config", `Updated live URL / countdown date`);
       alert("Settings saved!");
     } catch (e) {
       console.error("Error saving settings:", e);
@@ -167,6 +169,8 @@ export default function AdminPage() {
         updatedAt: serverTimestamp(),
       });
 
+      await logAdminAction("create_candidate", `${firstname} ${lastname}`, `Nickname: ${nickname}, Class: ${studentClass}`);
+
       resetForm();
       fetchCandidates();
       alert("Candidate added successfully!");
@@ -195,6 +199,7 @@ export default function AdminPage() {
 
     try {
       await deleteDoc(doc(db, "candidates", candidate.id));
+      await logAdminAction("delete_candidate", `${candidate.firstname} ${candidate.lastname}`, `ID: ${candidate.id}`);
       fetchCandidates();
     } catch (error) {
       console.error("Error deleting candidate:", error);
