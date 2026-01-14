@@ -297,7 +297,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
                     Edit Candidate
                   </h1>
                   <p className="text-white/50">
-                    {candidate.firstname} {candidate.lastname} • Class {candidate.class}
+                    {candidate.firstname} {candidate.lastname} • M.4/{candidate.class}
                   </p>
                   <p className="text-xs text-white/30 mt-1">
                     Hover over photo to change image

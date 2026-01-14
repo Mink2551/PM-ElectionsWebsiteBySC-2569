@@ -466,7 +466,7 @@ export default function AdminPage() {
                                 {candidate.firstname} {candidate.lastname}
                               </p>
                               <p className="text-sm text-muted-color">
-                                "{candidate.nickname}" • Class {candidate.class} • {candidate.votes || 0} votes
+                                "{candidate.nickname}" • M.4/{candidate.class} • {candidate.votes || 0} votes
                               </p>
                             </div>
                           </div>

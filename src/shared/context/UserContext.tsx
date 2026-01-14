@@ -10,6 +10,11 @@ interface UserData {
     nickname: string;
     ip?: string;
     userAgent?: string;
+    deviceType?: "Mobile" | "Tablet" | "Desktop";
+    platform?: string;
+    browser?: string;
+    browserVersion?: string;
+    screenResolution?: string;
     registeredAt: string;
 }
 
@@ -120,11 +125,60 @@ export function UserProvider({ children }: { children: ReactNode }) {
             console.log("Could not fetch IP:", e);
         }
 
+        // Get device information
+        const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "";
+
+        // Detect device type
+        const detectDeviceType = (ua: string): "Mobile" | "Tablet" | "Desktop" => {
+            if (/tablet|ipad|playbook|silk/i.test(ua)) return "Tablet";
+            if (/mobile|iphone|ipod|android.*mobile|webos|blackberry|opera mini|iemobile/i.test(ua)) return "Mobile";
+            return "Desktop";
+        };
+
+        // Detect platform
+        const detectPlatform = (ua: string): string => {
+            if (/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+            if (/Android/i.test(ua)) return "Android";
+            if (/Mac OS X|Macintosh/i.test(ua)) return "macOS";
+            if (/Windows/i.test(ua)) return "Windows";
+            if (/Linux/i.test(ua)) return "Linux";
+            if (/CrOS/i.test(ua)) return "Chrome OS";
+            return "Unknown";
+        };
+
+        // Detect browser and version
+        const detectBrowser = (ua: string): { name: string; version: string } => {
+            const browsers = [
+                { name: "Edge", regex: /Edg(?:e|A|iOS)?\/(\d+[\d.]*)/ },
+                { name: "Chrome", regex: /Chrome\/(\d+[\d.]*)/ },
+                { name: "Safari", regex: /Version\/(\d+[\d.]*).*Safari/ },
+                { name: "Firefox", regex: /Firefox\/(\d+[\d.]*)/ },
+                { name: "Opera", regex: /OPR\/(\d+[\d.]*)/ },
+                { name: "Samsung", regex: /SamsungBrowser\/(\d+[\d.]*)/ },
+                { name: "IE", regex: /MSIE (\d+[\d.]*)/ },
+            ];
+            for (const browser of browsers) {
+                const match = ua.match(browser.regex);
+                if (match) return { name: browser.name, version: match[1] || "" };
+            }
+            return { name: "Unknown", version: "" };
+        };
+
+        const browserInfo = detectBrowser(userAgent);
+        const screenResolution = typeof window !== "undefined"
+            ? `${window.screen.width}x${window.screen.height}`
+            : "";
+
         const userData: UserData = {
             studentId,
             nickname,
             ip,
-            userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+            userAgent,
+            deviceType: detectDeviceType(userAgent),
+            platform: detectPlatform(userAgent),
+            browser: browserInfo.name,
+            browserVersion: browserInfo.version,
+            screenResolution,
             registeredAt: new Date().toISOString(),
         };
 

@@ -14,6 +14,11 @@ interface User {
     nickname: string;
     ip?: string;
     userAgent?: string;
+    deviceType?: "Mobile" | "Tablet" | "Desktop";
+    platform?: string;
+    browser?: string;
+    browserVersion?: string;
+    screenResolution?: string;
     registeredAt: string;
     lastActive?: string;
     isBlocked: boolean;
@@ -29,6 +34,8 @@ export default function AdminUsersPage() {
     const [blockReason, setBlockReason] = useState("");
     const [showBlockModal, setShowBlockModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [detailUser, setDetailUser] = useState<User | null>(null);
 
     useEffect(() => {
         fetchUsers();
@@ -163,30 +170,45 @@ export default function AdminUsersPage() {
                                     <table className="w-full">
                                         <thead>
                                             <tr className="border-b border-glass-border">
-                                                <th className="px-6 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Student ID</th>
-                                                <th className="px-6 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Nickname</th>
-                                                <th className="px-6 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">IP</th>
-                                                <th className="px-6 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Registered</th>
-                                                <th className="px-6 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Status</th>
-                                                <th className="px-6 py-4 text-right text-xs font-medium text-muted-color uppercase tracking-wider">Actions</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Student ID</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Nickname</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Device</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Browser</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">IP</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Registered</th>
+                                                <th className="px-4 py-4 text-left text-xs font-medium text-muted-color uppercase tracking-wider">Status</th>
+                                                <th className="px-4 py-4 text-right text-xs font-medium text-muted-color uppercase tracking-wider">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-glass-border">
                                             {filteredUsers.map((user) => (
                                                 <tr key={user.studentId} className={`${user.isBlocked ? 'bg-red-500/5' : ''} hover:bg-layer-1 transition-colors`}>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-4">
                                                         <span className="font-mono font-bold text-primary-color">{user.studentId}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-4">
                                                         <span className="text-secondary-color">{user.nickname}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-lg">
+                                                                {user.deviceType === "Mobile" ? "📱" : user.deviceType === "Tablet" ? "📲" : "🖥️"}
+                                                            </span>
+                                                            <span className="text-xs text-muted-color">{user.platform || "N/A"}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className="text-xs text-muted-color">
+                                                            {user.browser || "N/A"}{user.browserVersion ? ` v${user.browserVersion.split('.')[0]}` : ""}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4">
                                                         <span className="font-mono text-xs text-muted-color">{user.ip || "N/A"}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-4">
                                                         <span className="text-xs text-muted-color">{new Date(user.registeredAt).toLocaleDateString()}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-4">
                                                         {user.isBlocked ? (
                                                             <span className="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-medium">
                                                                 Blocked
@@ -197,8 +219,17 @@ export default function AdminUsersPage() {
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-6 py-4 text-right">
+                                                    <td className="px-4 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDetailUser(user);
+                                                                    setShowDetailModal(true);
+                                                                }}
+                                                                className="px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 text-xs font-medium transition-colors"
+                                                            >
+                                                                View
+                                                            </button>
                                                             {user.isBlocked ? (
                                                                 <button
                                                                     onClick={() => handleUnblock(user.studentId)}
@@ -276,6 +307,127 @@ export default function AdminUsersPage() {
                                     Cancel
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* User Detail Modal */}
+                {showDetailModal && detailUser && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDetailModal(false)} />
+                        <div className="relative w-full max-w-lg glass-card rounded-2xl p-8 max-h-[90vh] overflow-y-auto">
+                            <h3 className="text-xl font-bold text-primary-color mb-6 flex items-center gap-3">
+                                <span className="text-2xl">
+                                    {detailUser.deviceType === "Mobile" ? "📱" : detailUser.deviceType === "Tablet" ? "📲" : "🖥️"}
+                                </span>
+                                User Details
+                            </h3>
+
+                            <div className="space-y-4">
+                                {/* Basic Info */}
+                                <div className="bg-layer-1 rounded-xl p-4">
+                                    <h4 className="text-sm font-semibold text-muted-color uppercase mb-3">Basic Information</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <p className="text-xs text-muted-color">Student ID</p>
+                                            <p className="font-mono font-bold text-primary-color">{detailUser.studentId}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Nickname</p>
+                                            <p className="text-secondary-color">{detailUser.nickname}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Status</p>
+                                            {detailUser.isBlocked ? (
+                                                <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium">
+                                                    Blocked
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">
+                                                    Active
+                                                </span>
+                                            )}
+                                        </div>
+                                        {detailUser.blockReason && (
+                                            <div>
+                                                <p className="text-xs text-muted-color">Block Reason</p>
+                                                <p className="text-red-400 text-sm">{detailUser.blockReason}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Device Info */}
+                                <div className="bg-layer-1 rounded-xl p-4">
+                                    <h4 className="text-sm font-semibold text-muted-color uppercase mb-3">Device Information</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <p className="text-xs text-muted-color">Device Type</p>
+                                            <p className="text-secondary-color flex items-center gap-2">
+                                                <span>{detailUser.deviceType === "Mobile" ? "📱" : detailUser.deviceType === "Tablet" ? "📲" : "🖥️"}</span>
+                                                {detailUser.deviceType || "N/A"}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Platform</p>
+                                            <p className="text-secondary-color">{detailUser.platform || "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Browser</p>
+                                            <p className="text-secondary-color">{detailUser.browser || "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Browser Version</p>
+                                            <p className="text-secondary-color">{detailUser.browserVersion || "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Screen Resolution</p>
+                                            <p className="text-secondary-color">{detailUser.screenResolution || "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">IP Address</p>
+                                            <p className="font-mono text-secondary-color">{detailUser.ip || "N/A"}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* User Agent */}
+                                <div className="bg-layer-1 rounded-xl p-4">
+                                    <h4 className="text-sm font-semibold text-muted-color uppercase mb-3">User Agent</h4>
+                                    <p className="text-xs text-muted-color font-mono break-all bg-black/20 p-3 rounded-lg">
+                                        {detailUser.userAgent || "N/A"}
+                                    </p>
+                                </div>
+
+                                {/* Timestamps */}
+                                <div className="bg-layer-1 rounded-xl p-4">
+                                    <h4 className="text-sm font-semibold text-muted-color uppercase mb-3">Timestamps</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <p className="text-xs text-muted-color">Registered At</p>
+                                            <p className="text-secondary-color text-sm">
+                                                {new Date(detailUser.registeredAt).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-color">Last Active</p>
+                                            <p className="text-secondary-color text-sm">
+                                                {detailUser.lastActive ? new Date(detailUser.lastActive).toLocaleString() : "N/A"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    setShowDetailModal(false);
+                                    setDetailUser(null);
+                                }}
+                                className="w-full mt-6 py-3 rounded-xl border border-glass-border text-secondary-color hover:bg-layer-1 transition-colors"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 )}
