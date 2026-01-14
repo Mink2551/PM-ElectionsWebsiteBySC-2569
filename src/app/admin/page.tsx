@@ -17,6 +17,7 @@ interface Candidate {
   class: string;
   votes: number;
   imageUrl?: string;
+  candidateNumber?: number;
 }
 
 export default function AdminPage() {
@@ -75,6 +76,7 @@ export default function AdminPage() {
   const [lastname, setLastname] = useState("");
   const [nickname, setNickname] = useState("");
   const [studentClass, setStudentClass] = useState("1");
+  const [candidateNumber, setCandidateNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Image Upload State
@@ -158,6 +160,7 @@ export default function AdminPage() {
         lastname,
         nickname,
         class: studentClass,
+        candidateNumber: candidateNumber ? parseInt(candidateNumber) : null,
         votes: 0,
         imageUrl, // Stores the Base64 string directly
         createdAt: serverTimestamp(),
@@ -180,6 +183,7 @@ export default function AdminPage() {
     setLastname("");
     setNickname("");
     setStudentClass("1");
+    setCandidateNumber("");
     setSelectedFile(null);
     setImagePreview(null);
     setCroppedBlob(null);
@@ -382,6 +386,18 @@ export default function AdminPage() {
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
                         placeholder="e.g. Nara"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-secondary-color mb-2">Candidate Number</label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-purple-500 focus:outline-none transition-colors"
+                        value={candidateNumber}
+                        onChange={(e) => setCandidateNumber(e.target.value)}
+                        placeholder="e.g. 1, 2, 3..."
+                        min="1"
                       />
                     </div>
 

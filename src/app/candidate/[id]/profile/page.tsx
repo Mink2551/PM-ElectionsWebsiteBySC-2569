@@ -120,9 +120,9 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                 {candidate.firstname} {candidate.lastname}
               </h1>
               {candidate.nickname && (
-                <p className="text-accent text-lg">"{candidate.nickname}"</p>
+                <p className="text-accent text-xl font-semibold">"{candidate.nickname}"</p>
               )}
-              <p className="text-muted-color">Class 4 / {candidate.class}</p>
+              <p className="text-muted-color">{t("profile.class")}{candidate.class}</p>
             </div>
 
             {/* Stats Row */}
@@ -136,7 +136,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                 <p className="text-muted-color text-sm">{t("profile.policies")}</p>
               </div>
               <div className="text-center p-4 rounded-xl bg-layer-1">
-                <p className="text-2xl font-bold gradient-text">4 / {candidate.class}</p>
+                <p className="text-2xl font-bold gradient-text">{t("profile.class")}{candidate.class}</p>
                 <p className="text-muted-color text-sm">{t("profile.class")}</p>
               </div>
             </div>

@@ -438,8 +438,12 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
           </div>
         </div>
 
-        {/* Online Indicator */}
-        <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-green-500 border-2" style={{ borderColor: 'var(--bg-primary)' }} />
+        {/* Candidate Number Badge - Bottom Center */}
+        {data.candidateNumber && (
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg border-2" style={{ borderColor: 'var(--bg-primary)' }}>
+            {data.candidateNumber}
+          </div>
+        )}
       </div>
 
       {/* Name & Position */}
@@ -448,10 +452,10 @@ function CandidateCard({ data, index }: { data: any; index: number }) {
           {data.firstname} {data.lastname}
         </p>
         <p className="text-sm text-muted-color">
-          {data.position || `Class 4 / ${data.class}`}
+          {data.position || `${t("profile.class")} 4 / ${data.class}`}
         </p>
         {data.nickname && (
-          <p className="text-xs text-accent mt-1">"{data.nickname}"</p>
+          <p className="text-sm text-accent mt-1 font-medium">"{data.nickname}"</p>
         )}
       </div>
 

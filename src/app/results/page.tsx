@@ -183,7 +183,8 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
                         {candidate.firstname} {candidate.lastname}
                     </p>
                     <p className="text-sm text-muted-color">
-                        {candidate.nickname && `"${candidate.nickname}" • `}Class 4 / {candidate.class}
+                        {candidate.nickname && <span className="text-accent font-medium">"{candidate.nickname}"</span>}
+                        {candidate.nickname && " • "}M.{candidate.class}
                     </p>
                 </div>
 
