@@ -196,7 +196,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                 <p className="text-muted-color text-sm">{t("profile.policies")}</p>
               </div>
               <div className="text-center p-4 rounded-xl bg-layer-1">
-                <p className="text-2xl font-bold gradient-text">{t("profile.class")}{candidate.class}</p>
+                <p className="text-2xl font-bold gradient-text">{t("profile.class")}4/{candidate.class}</p>
                 <p className="text-muted-color text-sm">{t("profile.class")}</p>
               </div>
             </div>
