@@ -31,13 +31,47 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
   const [showCropper, setShowCropper] = useState(false);
   const [savingImage, setSavingImage] = useState(false);
 
+  // Extended Profile Edit State
+  const [profileData, setProfileData] = useState({
+    bio: "",
+    studyPlan: "",
+    birthday: "",
+    bloodType: "",
+    hobbies: "",        // comma-separated string for input
+    achievements: "",
+    instagram: "",
+    prevSchool: "",
+    prevGrade: "",
+    currentSchool: "",
+    currentGrade: "",
+    motivation: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+
   useEffect(() => {
     async function loadCandidate() {
       try {
         const ref = doc(db, "candidates", candidateId);
         const snap = await getDoc(ref);
         if (snap.exists()) {
-          setCandidate({ id: snap.id, ...snap.data() });
+          const data: any = { id: snap.id, ...snap.data() };
+          setCandidate(data);
+
+          // Initialize profile data from candidate
+          setProfileData({
+            bio: data.bio || "",
+            studyPlan: data.studyPlan || "",
+            birthday: data.birthday || "",
+            bloodType: data.bloodType || "",
+            hobbies: (data.hobbies || []).join(", "),
+            achievements: data.achievements || "",
+            instagram: data.instagram || "",
+            prevSchool: data.educationHistory?.prevSchool || "",
+            prevGrade: data.educationHistory?.prevGrade || "",
+            currentSchool: data.educationHistory?.currentSchool || "",
+            currentGrade: data.educationHistory?.currentGrade || "",
+            motivation: data.motivation || "",
+          });
         }
       } catch (error) {
         console.error("Error loading candidate:", error);
@@ -47,6 +81,36 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
     }
     loadCandidate();
   }, [candidateId]);
+
+  // Save extended profile
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const ref = doc(db, "candidates", candidateId);
+      await updateDoc(ref, {
+        bio: profileData.bio || null,
+        studyPlan: profileData.studyPlan || null,
+        birthday: profileData.birthday || null,
+        bloodType: profileData.bloodType || null,
+        hobbies: profileData.hobbies ? profileData.hobbies.split(",").map(h => h.trim()).filter(h => h) : [],
+        achievements: profileData.achievements || null,
+        instagram: profileData.instagram || null,
+        educationHistory: {
+          prevSchool: profileData.prevSchool || null,
+          prevGrade: profileData.prevGrade || null,
+          currentSchool: profileData.currentSchool || null,
+          currentGrade: profileData.currentGrade || null,
+        },
+        motivation: profileData.motivation || null,
+      });
+      alert("Profile saved successfully!");
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("Error saving profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   // Handle file selection for image edit
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -242,6 +306,174 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
+            {/* Extended Profile Section */}
+            <div className="glass-card rounded-2xl p-6 mb-8 animate-fadeInUp">
+              <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-sm">📝</span>
+                Personal Information
+              </h2>
+
+              <div className="space-y-4">
+                {/* Bio */}
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">Bio / About</label>
+                  <textarea
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors h-24 resize-none"
+                    value={profileData.bio}
+                    onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                    placeholder="Short bio about the candidate..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Study Plan */}
+                  <div>
+                    <label className="block text-sm text-white/70 mb-2">แผนการเรียน (Study Program)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                      value={profileData.studyPlan}
+                      onChange={(e) => setProfileData({ ...profileData, studyPlan: e.target.value })}
+                      placeholder="e.g. วิทย์-คณิต, ศิลป์-ภาษา"
+                    />
+                  </div>
+
+                  {/* Birthday */}
+                  <div>
+                    <label className="block text-sm text-white/70 mb-2">เกิดวันที่ (Birthday)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                      value={profileData.birthday}
+                      onChange={(e) => setProfileData({ ...profileData, birthday: e.target.value })}
+                      placeholder="e.g. 1 มกราคม 2553"
+                    />
+                  </div>
+
+                  {/* Blood Type */}
+                  <div>
+                    <label className="block text-sm text-white/70 mb-2">หมู่เลือด (Blood Type)</label>
+                    <select
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none transition-colors"
+                      value={profileData.bloodType}
+                      onChange={(e) => setProfileData({ ...profileData, bloodType: e.target.value })}
+                    >
+                      <option value="" className="bg-[#12121a]">Select...</option>
+                      <option value="A" className="bg-[#12121a]">A</option>
+                      <option value="B" className="bg-[#12121a]">B</option>
+                      <option value="AB" className="bg-[#12121a]">AB</option>
+                      <option value="O" className="bg-[#12121a]">O</option>
+                    </select>
+                  </div>
+
+                  {/* Instagram */}
+                  <div>
+                    <label className="block text-sm text-white/70 mb-2">Instagram ส่วนตัว</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                      value={profileData.instagram}
+                      onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
+                      placeholder="e.g. @username or full URL"
+                    />
+                  </div>
+                </div>
+
+                {/* Hobbies */}
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">งานอดิเรก (Hobbies) - คั่นด้วยเครื่องหมายจุลภาค</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                    value={profileData.hobbies}
+                    onChange={(e) => setProfileData({ ...profileData, hobbies: e.target.value })}
+                    placeholder="e.g. อ่านหนังสือ, เล่นกีฬา, ดูหนัง"
+                  />
+                </div>
+
+                {/* Achievements */}
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">ผลงาน (Achievements)</label>
+                  <textarea
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors h-24 resize-none"
+                    value={profileData.achievements}
+                    onChange={(e) => setProfileData({ ...profileData, achievements: e.target.value })}
+                    placeholder="List achievements, awards, or notable activities..."
+                  />
+                </div>
+
+                {/* Education History */}
+                <div className="pt-4 border-t border-white/10">
+                  <p className="text-sm text-white/70 mb-3">ประวัติการศึกษา (Education History)</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-white/50 mb-1">โรงเรียนเดิม (Previous School)</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                        value={profileData.prevSchool}
+                        onChange={(e) => setProfileData({ ...profileData, prevSchool: e.target.value })}
+                        placeholder="e.g. โรงเรียน ABC"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/50 mb-1">ชั้นปีเดิม (Previous Grade)</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                        value={profileData.prevGrade}
+                        onChange={(e) => setProfileData({ ...profileData, prevGrade: e.target.value })}
+                        placeholder="e.g. ม.3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/50 mb-1">โรงเรียนปัจจุบัน (Current School)</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                        value={profileData.currentSchool}
+                        onChange={(e) => setProfileData({ ...profileData, currentSchool: e.target.value })}
+                        placeholder="e.g. โรงเรียน XYZ"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/50 mb-1">ชั้นปีปัจจุบัน (Current Grade)</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                        value={profileData.currentGrade}
+                        onChange={(e) => setProfileData({ ...profileData, currentGrade: e.target.value })}
+                        placeholder="e.g. ม.4"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Motivation */}
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">ทำไมถึงสมัครประธานนักเรียน? (Why run for president?)</label>
+                  <textarea
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors h-32 resize-none"
+                    value={profileData.motivation}
+                    onChange={(e) => setProfileData({ ...profileData, motivation: e.target.value })}
+                    placeholder="Explain the candidate's motivation for running..."
+                  />
+                </div>
+
+                {/* Save Button */}
+                <button
+                  onClick={saveProfile}
+                  disabled={savingProfile}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:shadow-lg hover:shadow-pink-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingProfile ? "Saving..." : "Save Profile Information"}
+                </button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-purple-500/50 to-transparent my-8" />
+
             {/* Policies Section Header */}
             <div className="flex items-center gap-2 mb-4">
               <span className="w-1 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500"></span>
@@ -350,4 +582,3 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
     </AdminGuard>
   );
 }
-
