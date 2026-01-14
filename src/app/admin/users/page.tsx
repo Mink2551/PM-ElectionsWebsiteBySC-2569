@@ -40,6 +40,13 @@ export default function AdminUsersPage() {
 
     useEffect(() => {
         fetchUsers();
+
+        // Auto-refresh every 5 seconds for real-time status updates
+        const interval = setInterval(() => {
+            fetchUsers();
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     const fetchUsers = async () => {
@@ -500,8 +507,8 @@ export default function AdminUsersPage() {
                                     <button
                                         onClick={() => handleFocus(detailUser.studentId, detailUser.isFocused || false)}
                                         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${detailUser.isFocused
-                                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse'
-                                                : 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
+                                            ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse'
+                                            : 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
                                             }`}
                                     >
                                         {detailUser.isFocused ? '🔴 Stop Tracking' : '👁️ Start Focus'}
