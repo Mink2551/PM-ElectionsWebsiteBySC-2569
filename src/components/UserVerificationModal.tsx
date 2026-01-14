@@ -154,10 +154,36 @@ export default function UserVerificationModal() {
                     </div>
                 </form>
 
-                {/* Privacy Notice */}
-                <p className="text-[10px] text-white/30 text-center mt-6">
-                    🔒 Your information is used only for this election platform.
-                </p>
+                {/* Privacy Policy */}
+                <div className="mt-6 p-4 rounded-xl bg-layer-1 border border-glass-border">
+                    <h4 className="text-xs font-semibold text-muted-color uppercase mb-2 flex items-center gap-2">
+                        🔒 {language === "en" ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
+                    </h4>
+                    <div className="text-[11px] text-muted-color space-y-1">
+                        <p>{language === "en"
+                            ? "By continuing, you agree to the following:"
+                            : "การดำเนินการต่อถือว่าคุณยอมรับสิ่งต่อไปนี้:"
+                        }</p>
+                        <ul className="list-disc list-inside space-y-0.5 ml-1">
+                            <li>{language === "en"
+                                ? "Your Student ID and nickname will be stored"
+                                : "รหัสนักศึกษาและชื่อเล่นของคุณจะถูกจัดเก็บ"
+                            }</li>
+                            <li>{language === "en"
+                                ? "Device info (browser, IP) collected for security"
+                                : "ข้อมูลอุปกรณ์ (เบราว์เซอร์, IP) เก็บเพื่อความปลอดภัย"
+                            }</li>
+                            <li>{language === "en"
+                                ? "Data used only for this election platform"
+                                : "ข้อมูลใช้เฉพาะแพลตฟอร์มเลือกตั้งนี้เท่านั้น"
+                            }</li>
+                            <li>{language === "en"
+                                ? "Admins can view your activity for moderation"
+                                : "ผู้ดูแลสามารถดูกิจกรรมของคุณเพื่อการตรวจสอบ"
+                            }</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     );
