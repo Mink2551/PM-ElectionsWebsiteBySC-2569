@@ -89,7 +89,21 @@ const translations = {
         "btn.back_home": "Back to Home",
         "btn.view_all_policies": "View all",
         "theme.light": "Light Mode",
-        "theme.dark": "Dark Mode"
+        "theme.dark": "Dark Mode",
+        "profile.studyPlan": "Study Program",
+        "profile.birthday": "Birthday",
+        "profile.bloodType": "Blood Type",
+        "profile.hobbies": "Hobbies",
+        "profile.achievements": "Achievements",
+        "profile.instagram": "Personal Instagram",
+        "profile.partyInstagram": "Party Instagram",
+        "profile.education": "Education History",
+        "profile.prevSchool": "Previous School",
+        "profile.prevGrade": "Grade",
+        "profile.currentSchool": "Current School",
+        "profile.currentGrade": "Grade",
+        "profile.motivation": "Why run for Student President?",
+        "profile.personalInfo": "Personal Information"
     },
     th: {
         "nav.home": "หน้าแรก",
@@ -168,7 +182,21 @@ const translations = {
         "btn.back_home": "กลับไปหน้าแรก",
         "btn.view_all_policies": "ดูทั้งหมด",
         "theme.light": "โหมดสว่าง",
-        "theme.dark": "โหมดมืด"
+        "theme.dark": "โหมดมืด",
+        "profile.studyPlan": "แผนการเรียน",
+        "profile.birthday": "เกิดวันที่",
+        "profile.bloodType": "หมู่เลือด",
+        "profile.hobbies": "งานอดิเรก",
+        "profile.achievements": "ผลงาน",
+        "profile.instagram": "Instagram ส่วนตัว",
+        "profile.partyInstagram": "IG พรรค",
+        "profile.education": "ประวัติการศึกษา",
+        "profile.prevSchool": "โรงเรียนเดิม",
+        "profile.prevGrade": "เกรด",
+        "profile.currentSchool": "โรงเรียนปัจจุบัน",
+        "profile.currentGrade": "เกรด",
+        "profile.motivation": "ทำไมถึงสมัครประธานนักเรียน?",
+        "profile.personalInfo": "ข้อมูลส่วนตัว"
     }
 };
 

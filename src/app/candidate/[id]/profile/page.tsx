@@ -87,35 +87,22 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
 
   const policyCount = candidate.policies ? Object.keys(candidate.policies).length : 0;
 
-  // Labels based on language
-  const labels = language === "th" ? {
-    studyPlan: "แผนการเรียน",
-    birthday: "เกิดวันที่",
-    bloodType: "หมู่เลือด",
-    hobbies: "งานอดิเรก",
-    achievements: "ผลงาน",
-    instagram: "Instagram ส่วนตัว",
-    education: "ประวัติการศึกษา",
-    prevSchool: "โรงเรียนเดิม",
-    prevGrade: "ชั้นปีเดิม",
-    currentSchool: "โรงเรียนปัจจุบัน",
-    currentGrade: "ชั้นปีปัจจุบัน",
-    motivation: "ทำไมถึงสมัครประธานนักเรียน?",
-    personalInfo: "ข้อมูลส่วนตัว",
-  } : {
-    studyPlan: "Study Program",
-    birthday: "Birthday",
-    bloodType: "Blood Type",
-    hobbies: "Hobbies",
-    achievements: "Achievements",
-    instagram: "Personal Instagram",
-    education: "Education History",
-    prevSchool: "Previous School",
-    prevGrade: "Previous Grade",
-    currentSchool: "Current School",
-    currentGrade: "Current Grade",
-    motivation: "Why run for Student President?",
-    personalInfo: "Personal Information",
+  // Labels from LanguageContext
+  const labels = {
+    studyPlan: t("profile.studyPlan"),
+    birthday: t("profile.birthday"),
+    bloodType: t("profile.bloodType"),
+    hobbies: t("profile.hobbies"),
+    achievements: t("profile.achievements"),
+    instagram: t("profile.instagram"),
+    partyInstagram: t("profile.partyInstagram"),
+    education: t("profile.education"),
+    prevSchool: t("profile.prevSchool"),
+    prevGrade: t("profile.prevGrade"),
+    currentSchool: t("profile.currentSchool"),
+    currentGrade: t("profile.currentGrade"),
+    motivation: t("profile.motivation"),
+    personalInfo: t("profile.personalInfo"),
   };
 
   return (

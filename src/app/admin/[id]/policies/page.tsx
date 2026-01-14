@@ -46,6 +46,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
     currentSchool: "",
     currentGrade: "",
     motivation: "",
+    partyInstagram: "",
     reels: [] as string[],
   });
   const [savingProfile, setSavingProfile] = useState(false);
@@ -73,6 +74,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
             currentSchool: data.educationHistory?.currentSchool || "",
             currentGrade: data.educationHistory?.currentGrade || "",
             motivation: data.motivation || "",
+            partyInstagram: data.partyInstagram || "",
             reels: data.reels || [],
           });
         }
@@ -105,6 +107,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
           currentGrade: profileData.currentGrade || null,
         },
         motivation: profileData.motivation || null,
+        partyInstagram: profileData.partyInstagram || null,
         reels: profileData.reels || [],
       });
 
@@ -392,6 +395,18 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
                       value={profileData.instagram}
                       onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
                       placeholder="e.g. @username or full URL"
+                    />
+                  </div>
+
+                  {/* Party Instagram */}
+                  <div>
+                    <label className="block text-sm text-white/70 mb-2">IG พรรค (Party Instagram)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-purple-500 focus:outline-none transition-colors"
+                      value={profileData.partyInstagram}
+                      onChange={(e) => setProfileData({ ...profileData, partyInstagram: e.target.value })}
+                      placeholder="e.g. @my_party or full URL"
                     />
                   </div>
                 </div>
