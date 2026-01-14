@@ -66,13 +66,19 @@ export default function AdminUsersPage() {
 
     const handleBlock = async (userId: string) => {
         try {
+            // Generate unique block ID code
+            const blockId = `BAN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+            const fullBlockReason = `[${blockId}] ${blockReason || "No reason provided"}`;
+
             await updateDoc(doc(db, "users", userId), {
                 isBlocked: true,
-                blockReason: blockReason || "No reason provided"
+                blockReason: fullBlockReason,
+                blockId: blockId,
+                blockedAt: new Date().toISOString()
             });
             setUsers(prev => prev.map(u =>
                 u.studentId === userId
-                    ? { ...u, isBlocked: true, blockReason: blockReason || "No reason provided" }
+                    ? { ...u, isBlocked: true, blockReason: fullBlockReason }
                     : u
             ));
             setShowBlockModal(false);
