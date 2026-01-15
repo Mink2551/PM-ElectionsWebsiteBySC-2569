@@ -40,7 +40,7 @@ export default function PolicyCard({
                     {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold text-primary-color leading-tight line-clamp-2">
+                    <h2 className="text-lg font-semibold text-primary-color py-1 leading-tight line-clamp-2">
                         {policy.title}
                     </h2>
                 </div>
