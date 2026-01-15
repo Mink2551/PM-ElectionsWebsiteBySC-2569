@@ -8,6 +8,7 @@ import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
 import ImageCropper from "@/components/ImageCropper";
 import { logAdminAction } from "@/lib/adminLogger";
+import { useToast, ToastContainer } from "@/components/Toast";
 
 interface Policy {
   title: string;
@@ -56,6 +57,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
   });
   const [savingProfile, setSavingProfile] = useState(false);
 
+  // Toast notifications
+  const toast = useToast();
+
   useEffect(() => {
     async function loadCandidate() {
       try {
@@ -72,7 +76,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
             birthday: data.birthday || "",
             bloodType: data.bloodType || "",
             hobbies: (data.hobbies || []).join(", "),
-            achievements: data.achievements || "",
+            achievements: Array.isArray(data.achievements)
+              ? data.achievements.join(", ")
+              : (data.achievements || ""),
             instagram: data.instagram || "",
             prevSchool: data.educationHistory?.prevSchool || "",
             prevGrade: data.educationHistory?.prevGrade || "",
@@ -103,7 +109,11 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
         birthday: profileData.birthday || null,
         bloodType: profileData.bloodType || null,
         hobbies: profileData.hobbies ? profileData.hobbies.split(",").map(h => h.trim()).filter(h => h) : [],
-        achievements: profileData.achievements ? profileData.achievements.split(",").map(a => a.trim()).filter(a => a) : [],
+        achievements: profileData.achievements
+          ? (typeof profileData.achievements === 'string'
+            ? profileData.achievements.split(",").map(a => a.trim()).filter(a => a)
+            : profileData.achievements)
+          : [],
         instagram: profileData.instagram || null,
         educationHistory: {
           prevSchool: profileData.prevSchool || null,
@@ -119,10 +129,10 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
       const candidateName = `${candidate.firstname} ${candidate.lastname}`;
       await logAdminAction("update_candidate", candidateName, "Updated extended profile information");
 
-      alert("Profile saved successfully!");
-    } catch (error) {
+      toast.success("Profile Saved", "Extended profile information updated successfully.");
+    } catch (error: any) {
       console.error("Error saving profile:", error);
-      alert("Error saving profile");
+      toast.error("Save Failed", error?.message || "Could not save profile. Please try again.");
     } finally {
       setSavingProfile(false);
     }
@@ -166,10 +176,10 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
 
       setCandidate((prev: any) => ({ ...prev, imageUrl }));
       setImagePreview(null);
-      alert("Image updated successfully!");
-    } catch (error) {
+      toast.success("Image Updated", "Profile photo changed successfully.");
+    } catch (error: any) {
       console.error("Error updating image:", error);
-      alert("Error updating image");
+      toast.error("Upload Failed", error?.message || "Could not update image. Please try again.");
     } finally {
       setSavingImage(false);
     }
@@ -204,7 +214,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
 
   const addPolicy = async () => {
     if (!newTitle.trim() || !newDescription.trim()) {
-      alert("Please fill all fields");
+      toast.warning("Missing Fields", "Please fill in both title and description.");
       return;
     }
 
@@ -237,9 +247,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
 
       setNewTitle("");
       setNewDescription("");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding policy:", error);
-      alert("Error adding policy");
+      toast.error("Add Failed", error?.message || "Could not add policy. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -262,9 +272,9 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
 
       const candidateName = `${candidate.firstname} ${candidate.lastname}`;
       await logAdminAction("delete_policy", `${candidateName} (Policy ID: ${policyId})`, "Deleted policy");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting policy:", error);
-      alert("Error deleting policy");
+      toast.error("Delete Failed", error?.message || "Could not delete policy. Please try again.");
     }
   };
 
@@ -282,7 +292,7 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
 
   const saveEditPolicy = async () => {
     if (!editingPolicyId || !editTitle.trim() || !editDescription.trim()) {
-      alert("Please fill all fields");
+      toast.warning("Missing Fields", "Please fill in both title and description.");
       return;
     }
 
@@ -309,14 +319,17 @@ export default function PolicyEditorPage({ params }: { params: Promise<{ id: str
       await logAdminAction("update_policy", `${candidateName} - ${editTitle}`, "Updated policy");
 
       cancelEditPolicy();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating policy:", error);
-      alert("Error updating policy");
+      toast.error("Update Failed", error?.message || "Could not update policy. Please try again.");
     }
   };
 
   return (
     <AdminGuard>
+      {/* Toast Container */}
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
+
       <div className="min-h-screen transition-colors duration-300">
         <Navbar />
 

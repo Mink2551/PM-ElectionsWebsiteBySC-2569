@@ -9,6 +9,7 @@ import AdminGuard from "@/components/AdminGuard";
 import ImageCropper from "@/components/ImageCropper";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { logAdminAction } from "@/lib/adminLogger";
+import { useToast, ToastContainer } from "@/components/Toast";
 
 interface Candidate {
   id: string;
@@ -25,6 +26,7 @@ export default function AdminPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   // Form state
   // ... existing form state ...
@@ -66,10 +68,10 @@ export default function AdminPage() {
         countdownDate: countdownDate ? new Date(countdownDate).toISOString() : null
       }, { merge: true });
       await logAdminAction("update_live_settings", "Global Config", `Updated live URL / countdown date`);
-      alert("Settings saved!");
-    } catch (e) {
+      toast.success("Settings Saved", "Live URL and countdown date updated successfully.");
+    } catch (e: any) {
       console.error("Error saving settings:", e);
-      alert("Error saving settings");
+      toast.error("Save Failed", e?.message || "Could not save settings. Please try again.");
     } finally {
       setSavingSettings(false);
     }
@@ -143,7 +145,7 @@ export default function AdminPage() {
     e.preventDefault();
 
     if (!firstname.trim() || !lastname.trim() || !nickname.trim()) {
-      alert("Please fill all required fields");
+      toast.warning("Missing Fields", "Please fill in firstname, lastname, and nickname.");
       return;
     }
 
@@ -173,10 +175,10 @@ export default function AdminPage() {
 
       resetForm();
       fetchCandidates();
-      alert("Candidate added successfully!");
-    } catch (err) {
+      toast.success("Candidate Added", `${firstname} ${lastname} has been added successfully.`);
+    } catch (err: any) {
       console.error(err);
-      alert("Error adding candidate");
+      toast.error("Add Failed", err?.message || "Could not add candidate. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -201,9 +203,9 @@ export default function AdminPage() {
       await deleteDoc(doc(db, "candidates", candidate.id));
       await logAdminAction("delete_candidate", `${candidate.firstname} ${candidate.lastname}`, `ID: ${candidate.id}`);
       fetchCandidates();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting candidate:", error);
-      alert("Error deleting candidate");
+      toast.error("Delete Failed", error?.message || "Could not delete candidate. Please try again.");
     }
   };
 
@@ -213,6 +215,9 @@ export default function AdminPage() {
 
   return (
     <AdminGuard>
+      {/* Toast Container */}
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
+
       <div className="min-h-screen transition-colors duration-300">
         <Navbar />
 
