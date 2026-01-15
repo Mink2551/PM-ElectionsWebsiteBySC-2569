@@ -29,6 +29,8 @@ export default function Hero() {
           id: doc.id,
           ...doc.data(),
         }));
+        // Sort by candidate number
+        docs.sort((a: any, b: any) => (a.candidateNumber || 999) - (b.candidateNumber || 999));
         setCandidates(docs);
 
         // Calculate Trending Policies
@@ -233,9 +235,11 @@ export default function Hero() {
 
           {/* Candidates Grid */}
           {!loading && candidates.length > 0 && (
-            <div className={`grid gap-6 ${gridClass}`}>
+            <div className="flex flex-wrap justify-center gap-6">
               {candidates.map((c, index) => (
-                <CandidateCard key={c.id} data={c} index={index} />
+                <div key={c.id} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)]">
+                  <CandidateCard data={c} index={index} />
+                </div>
               ))}
             </div>
           )}
