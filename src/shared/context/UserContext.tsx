@@ -3,11 +3,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import Cookies from "js-cookie";
 import { db } from "@/lib/firebase";
-import { doc, onSnapshot, getDoc } from "firebase/firestore";
+import { doc, onSnapshot, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { hashPassword, verifyPassword } from "@/lib/password";
 
 interface UserData {
     studentId: string;
     nickname: string;
+    passwordHash?: string;
+    hasPassword?: boolean;
     ip?: string;
     userAgent?: string;
     deviceType?: "Mobile" | "Tablet" | "Desktop";
@@ -28,7 +31,10 @@ interface UserContextType {
     isVerified: boolean;
     isBlocked: boolean;
     blockReason: string | null;
-    registerUser: (studentId: string, nickname: string) => Promise<void>;
+    registerUser: (studentId: string, nickname: string, password: string) => Promise<void>;
+    verifyUserPassword: (studentId: string, password: string) => Promise<boolean>;
+    setUserPassword: (studentId: string, password: string) => Promise<void>;
+    checkUserExists: (studentId: string) => Promise<{ exists: boolean; hasPassword: boolean; nickname?: string }>;
     clearUser: () => void;
     showVerificationModal: boolean;
     setShowVerificationModal: (show: boolean) => void;
@@ -106,8 +112,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         const updateLastActive = async () => {
             try {
-                const { updateDoc, getDoc } = await import("firebase/firestore");
-
                 // Check if user is being focused (monitored)
                 const userDoc = await getDoc(doc(db, "users", user.studentId));
                 if (userDoc.exists()) {
@@ -146,7 +150,128 @@ export function UserProvider({ children }: { children: ReactNode }) {
         };
     }, [user?.studentId, isBlocked]);
 
-    const registerUser = async (studentId: string, nickname: string) => {
+    const checkUserExists = async (studentId: string): Promise<{ exists: boolean; hasPassword: boolean; nickname?: string }> => {
+        try {
+            const userDocRef = doc(db, "users", studentId);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                return {
+                    exists: true,
+                    hasPassword: data?.hasPassword === true,
+                    nickname: data?.nickname
+                };
+            }
+            return { exists: false, hasPassword: false };
+        } catch (e) {
+            console.error("Error checking user exists:", e);
+            return { exists: false, hasPassword: false };
+        }
+    };
+
+    const verifyUserPassword = async (studentId: string, password: string): Promise<boolean> => {
+        try {
+            const userDocRef = doc(db, "users", studentId);
+            const userDoc = await getDoc(userDocRef);
+
+            if (!userDoc.exists()) return false;
+
+            const data = userDoc.data();
+            if (!data?.passwordHash) return false;
+
+            // Check if blocked
+            if (data.isBlocked) {
+                setIsBlocked(true);
+                setBlockReason(data.blockReason || "This account has been blocked.");
+                return false;
+            }
+
+            const isValid = await verifyPassword(password, data.passwordHash);
+
+            if (isValid) {
+                // Login successful - set user data from Firestore
+                const userData: UserData = {
+                    studentId,
+                    nickname: data.nickname,
+                    passwordHash: data.passwordHash,
+                    hasPassword: true,
+                    ip: data.ip,
+                    userAgent: data.userAgent,
+                    deviceType: data.deviceType,
+                    platform: data.platform,
+                    browser: data.browser,
+                    browserVersion: data.browserVersion,
+                    screenResolution: data.screenResolution,
+                    registeredAt: data.registeredAt,
+                };
+
+                Cookies.set(USER_COOKIE_NAME, JSON.stringify(userData), { expires: 365 });
+                setUser(userData);
+                setShowVerificationModal(false);
+
+                // Update last active
+                await updateDoc(userDocRef, {
+                    lastActive: new Date().toISOString(),
+                });
+            }
+
+            return isValid;
+        } catch (e) {
+            console.error("Error verifying password:", e);
+            return false;
+        }
+    };
+
+    const setUserPassword = async (studentId: string, password: string): Promise<void> => {
+        try {
+            const userDocRef = doc(db, "users", studentId);
+            const userDoc = await getDoc(userDocRef);
+
+            if (!userDoc.exists()) throw new Error("User not found");
+
+            const data = userDoc.data();
+            if (data?.isBlocked) {
+                setIsBlocked(true);
+                setBlockReason(data.blockReason || "This account has been blocked.");
+                return;
+            }
+
+            const passwordHash = await hashPassword(password);
+
+            // Update Firestore with password
+            await updateDoc(userDocRef, {
+                passwordHash,
+                hasPassword: true,
+                lastActive: new Date().toISOString(),
+            });
+
+            // Set user data
+            const userData: UserData = {
+                studentId,
+                nickname: data.nickname,
+                passwordHash,
+                hasPassword: true,
+                ip: data.ip,
+                userAgent: data.userAgent,
+                deviceType: data.deviceType,
+                platform: data.platform,
+                browser: data.browser,
+                browserVersion: data.browserVersion,
+                screenResolution: data.screenResolution,
+                registeredAt: data.registeredAt,
+            };
+
+            Cookies.set(USER_COOKIE_NAME, JSON.stringify(userData), { expires: 365 });
+            setUser(userData);
+            setShowVerificationModal(false);
+        } catch (e) {
+            console.error("Error setting password:", e);
+            throw e;
+        }
+    };
+
+    const registerUser = async (studentId: string, nickname: string, password: string) => {
         // Check if user already exists and is blocked
         try {
             const userDocRef = doc(db, "users", studentId);
@@ -163,6 +288,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } catch (e) {
             console.error("Error checking user status:", e);
         }
+
+        // Hash the password
+        const passwordHash = await hashPassword(password);
 
         // Get user metadata
         let ip = "";
@@ -221,6 +349,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const userData: UserData = {
             studentId,
             nickname,
+            passwordHash,
+            hasPassword: true,
             ip,
             userAgent,
             deviceType: detectDeviceType(userAgent),
@@ -238,7 +368,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         // Also save to Firestore for admin tracking
         try {
-            const { setDoc } = await import("firebase/firestore");
             await setDoc(doc(db, "users", studentId), {
                 ...userData,
                 isBlocked: false,
@@ -280,6 +409,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 isBlocked,
                 blockReason,
                 registerUser,
+                verifyUserPassword,
+                setUserPassword,
+                checkUserExists,
                 clearUser,
                 showVerificationModal,
                 setShowVerificationModal,
