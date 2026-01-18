@@ -21,23 +21,31 @@ export default function ReelsSection() {
                 const snap = await getDocs(collection(db, "candidates"));
                 const allReels: Reel[] = [];
 
+                const seenUrls = new Set<string>();
+
                 snap.forEach(doc => {
                     const data = doc.data();
                     if (data.reels && Array.isArray(data.reels)) {
                         data.reels.forEach((url: string) => {
                             if (url) {
-                                allReels.push({
-                                    url,
-                                    candidateName: `${data.firstname} ${data.lastname}`,
-                                    candidateId: doc.id
-                                });
+                                // Normalize URL for deduplication (remove query params and trailing slash)
+                                const normalizedUrl = url.split('?')[0].replace(/\/$/, '');
+
+                                // Only add if we haven't seen this URL before
+                                if (!seenUrls.has(normalizedUrl)) {
+                                    seenUrls.add(normalizedUrl);
+                                    allReels.push({
+                                        url,
+                                        candidateName: `${data.firstname} ${data.lastname}`,
+                                        candidateId: doc.id
+                                    });
+                                }
                             }
                         });
                     }
                 });
 
-                // Shuffle for randomness or sort? 
-                // Let's just show them in order found for now, or randomize slightly
+                // Shuffle for randomness
                 setReels(allReels.sort(() => 0.5 - Math.random()));
             } catch (error) {
                 console.error("Error fetching reels:", error);
@@ -61,35 +69,39 @@ export default function ReelsSection() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {reels.map((reel, index) => {
-                        let embedUrl = reel.url;
-                        if (reel.url.includes('instagram.com')) {
-                            const cleanUrl = reel.url.split('?')[0];
-                            embedUrl = cleanUrl.endsWith('/') ? `${cleanUrl}embed` : `${cleanUrl}/embed`;
-                        }
+                {/* Horizontal Scroll Container */}
+                <div className="overflow-x-auto pb-4 -mx-4 px-4 md:-mx-8 md:px-8">
+                    <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+                        {reels.map((reel, index) => {
+                            let embedUrl = reel.url;
+                            // Support both Instagram Reels (/reel/) and Posts (/p/)
+                            if (reel.url.includes('instagram.com') && (reel.url.includes('/reel/') || reel.url.includes('/p/'))) {
+                                const cleanUrl = reel.url.split('?')[0];
+                                embedUrl = cleanUrl.endsWith('/') ? `${cleanUrl}embed` : `${cleanUrl}/embed`;
+                            }
 
-                        return (
-                            <div key={index} className="animate-fadeInUp" style={{ animationDelay: `${index * 100}ms` }}>
-                                <div className="glass-card rounded-2xl overflow-hidden aspect-[9/16] relative group border border-glass-border hover:border-purple-500/30 transition-all shadow-lg hover:shadow-purple-500/20">
-                                    <iframe
-                                        src={embedUrl}
-                                        className="w-full h-full object-cover"
-                                        frameBorder="0"
-                                        allowFullScreen
-                                        scrolling="no"
-                                    />
+                            return (
+                                <div key={index} className="animate-fadeInUp flex-shrink-0" style={{ animationDelay: `${index * 100}ms`, width: '280px' }}>
+                                    <div className="glass-card rounded-2xl overflow-hidden aspect-[9/16] relative group border border-glass-border hover:border-purple-500/30 transition-all shadow-lg hover:shadow-purple-500/20">
+                                        <iframe
+                                            src={embedUrl}
+                                            className="w-full h-full object-cover"
+                                            frameBorder="0"
+                                            allowFullScreen
+                                            scrolling="no"
+                                        />
 
-                                    {/* Candidate Badge */}
-                                    <a href={`/candidate/${reel.candidateId}/profile`} className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <p className="text-white text-sm font-medium truncate text-center">
-                                            {reel.candidateName}
-                                        </p>
-                                    </a>
+                                        {/* Candidate Badge */}
+                                        <a href={`/candidate/${reel.candidateId}/profile`} className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <p className="text-white text-sm font-medium truncate text-center">
+                                                {reel.candidateName}
+                                            </p>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </section>

@@ -20,10 +20,12 @@ interface Candidate {
 export default function VotesAdminPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [abstainVotes, setAbstainVotes] = useState(0);
+    const [spoiledVotes, setSpoiledVotes] = useState(0);
     const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
     const [updatingAbstain, setUpdatingAbstain] = useState(false);
+    const [updatingSpoiled, setUpdatingSpoiled] = useState(false);
 
     useEffect(() => {
         fetchCandidates();
@@ -36,6 +38,7 @@ export default function VotesAdminPage() {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 setAbstainVotes(docSnap.data().abstain || 0);
+                setSpoiledVotes(docSnap.data().spoiled || 0);
             }
         } catch (e) {
             console.error("Error fetching settings:", e);
@@ -88,6 +91,36 @@ export default function VotesAdminPage() {
             alert("Failed to update abstain votes");
         } finally {
             setUpdatingAbstain(false);
+        }
+    };
+
+    const handleUpdateSpoiled = async (action: "increment" | "decrement" | "set", value?: number) => {
+        setUpdatingSpoiled(true);
+        try {
+            const ref = doc(db, "settings", "config");
+            let newVal = spoiledVotes;
+
+            if (action === "set" && value !== undefined) {
+                newVal = value;
+            } else {
+                newVal = spoiledVotes + (action === "increment" ? 1 : -1);
+                newVal = Math.max(0, newVal);
+            }
+
+            await setDoc(ref, { spoiled: newVal }, { merge: true });
+
+            await logAdminAction(
+                "update_spoiled",
+                "บัตรเสีย (Spoiled Ballots)",
+                `Action: ${action}, Value: ${action === 'set' ? value : (action === 'increment' ? '+1' : '-1')} (New Total: ${newVal})`
+            );
+
+            setSpoiledVotes(newVal);
+        } catch (error) {
+            console.error("Error updating spoiled votes:", error);
+            alert("Failed to update spoiled votes");
+        } finally {
+            setUpdatingSpoiled(false);
         }
     };
 
@@ -147,61 +180,103 @@ export default function VotesAdminPage() {
                             </a>
                         </div>
 
-                        {/* Abstain Votes Section */}
-                        <div className="mb-12 animate-fadeInUp" style={{ animationDelay: "50ms" }}>
-                            <h2 className="text-xl font-semibold text-primary-color mb-4 flex items-center gap-2">
-                                <span className="w-1 h-6 rounded-full bg-gradient-to-b from-gray-500 to-gray-700"></span>
-                                {t("admin.abstain_title")}
-                            </h2>
-                            <div className="glass-card rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 border-2 border-dashed border-glass-border">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-500 to-gray-700 flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                        </svg>
+                        {/* Abstain & Spoiled Ballots - Side by Side Grid */}
+                        <div className="mb-8 animate-fadeInUp" style={{ animationDelay: "50ms" }}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Abstain Card */}
+                                <div className="glass-card rounded-xl p-4 border-2 border-dashed border-glass-border">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-500 to-gray-700 flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-base font-bold text-primary-color">{t("results.abstain")}</h3>
+                                            <p className="text-muted-color text-xs">Non-voting delegates</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-2xl font-bold text-primary-color">{abstainVotes}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-primary-color">
-                                            {t("results.abstain")}
-                                        </h3>
-                                        <p className="text-muted-color text-sm">Global counter for non-voting delegates</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col md:flex-row items-center gap-4">
-                                    <div className="text-center md:text-right mr-4">
-                                        <span className="text-2xl font-bold text-primary-color block">{abstainVotes}</span>
-                                        <span className="text-xs text-muted-color uppercase tracking-wider">{t("admin.current_votes")}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 bg-layer-1 rounded-lg p-1 border border-glass-border">
-                                        <button
-                                            onClick={() => handleUpdateAbstain("decrement")}
-                                            disabled={updatingAbstain || abstainVotes <= 0}
-                                            className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-red-500/10 text-red-400 disabled:opacity-30 transition-colors"
-                                        >
-                                            -1
-                                        </button>
-                                        <div className="w-px h-6 bg-glass-border mx-1"></div>
-                                        <button
-                                            onClick={() => handleUpdateAbstain("increment")}
-                                            disabled={updatingAbstain}
-                                            className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-green-500/10 text-green-400 disabled:opacity-30 transition-colors"
-                                        >
-                                            +1
-                                        </button>
-                                    </div>
-
                                     <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 bg-layer-1 rounded-lg p-1 border border-glass-border flex-1 justify-center">
+                                            <button
+                                                onClick={() => handleUpdateAbstain("decrement")}
+                                                disabled={updatingAbstain || abstainVotes <= 0}
+                                                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-red-500/10 text-red-400 disabled:opacity-30 transition-colors text-sm font-medium"
+                                            >
+                                                -1
+                                            </button>
+                                            <div className="w-px h-5 bg-glass-border"></div>
+                                            <button
+                                                onClick={() => handleUpdateAbstain("increment")}
+                                                disabled={updatingAbstain}
+                                                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-green-500/10 text-green-400 disabled:opacity-30 transition-colors text-sm font-medium"
+                                            >
+                                                +1
+                                            </button>
+                                        </div>
                                         <input
                                             type="number"
                                             placeholder="Set"
-                                            className="w-20 px-3 py-2 rounded-lg bg-layer-1 border border-glass-border text-primary-color text-sm text-center focus:border-purple-500 focus:outline-none"
+                                            className="w-16 px-2 py-2 rounded-lg bg-layer-1 border border-glass-border text-primary-color text-sm text-center focus:border-purple-500 focus:outline-none"
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
                                                     const val = parseInt((e.target as HTMLInputElement).value);
                                                     if (!isNaN(val)) {
                                                         handleUpdateAbstain("set", val);
+                                                        (e.target as HTMLInputElement).value = '';
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Spoiled Ballot Card */}
+                                <div className="glass-card rounded-xl p-4 border-2 border-dashed border-red-500/30">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-base font-bold text-primary-color">{t("results.spoiled")}</h3>
+                                            <p className="text-muted-color text-xs">Invalid ballots</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-2xl font-bold text-red-400">{spoiledVotes}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 bg-layer-1 rounded-lg p-1 border border-glass-border flex-1 justify-center">
+                                            <button
+                                                onClick={() => handleUpdateSpoiled("decrement")}
+                                                disabled={updatingSpoiled || spoiledVotes <= 0}
+                                                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-red-500/10 text-red-400 disabled:opacity-30 transition-colors text-sm font-medium"
+                                            >
+                                                -1
+                                            </button>
+                                            <div className="w-px h-5 bg-glass-border"></div>
+                                            <button
+                                                onClick={() => handleUpdateSpoiled("increment")}
+                                                disabled={updatingSpoiled}
+                                                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-green-500/10 text-green-400 disabled:opacity-30 transition-colors text-sm font-medium"
+                                            >
+                                                +1
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            placeholder="Set"
+                                            className="w-16 px-2 py-2 rounded-lg bg-layer-1 border border-glass-border text-primary-color text-sm text-center focus:border-red-500 focus:outline-none"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    const val = parseInt((e.target as HTMLInputElement).value);
+                                                    if (!isNaN(val)) {
+                                                        handleUpdateSpoiled("set", val);
                                                         (e.target as HTMLInputElement).value = '';
                                                     }
                                                 }
@@ -217,71 +292,68 @@ export default function VotesAdminPage() {
                                 <div className="w-10 h-10 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                <h2 className="text-xl font-semibold text-primary-color mb-4 flex items-center gap-2">
-                                    <span className="w-1 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500"></span>
+                            <div className="space-y-2">
+                                <h2 className="text-lg font-semibold text-primary-color mb-3 flex items-center gap-2">
+                                    <span className="w-1 h-5 rounded-full bg-gradient-to-b from-purple-500 to-pink-500"></span>
                                     {t("nav.candidates")}
                                 </h2>
                                 {candidates.map((candidate, index) => (
                                     <div
                                         key={candidate.id}
-                                        className="glass-card rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 card-hover animate-fadeInUp"
-                                        style={{ animationDelay: `${index * 50}ms` }}
+                                        className="glass-card rounded-lg p-3 flex items-center justify-between gap-3 card-hover animate-fadeInUp"
+                                        style={{ animationDelay: `${index * 30}ms` }}
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-xl">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-sm">
                                                 {index + 1}
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-primary-color">
+                                                <h3 className="text-sm font-bold text-primary-color">
                                                     {candidate.firstname} {candidate.lastname}
                                                 </h3>
-                                                <p className="text-muted-color text-sm">"{candidate.nickname}"</p>
+                                                <p className="text-muted-color text-xs">"{candidate.nickname}"</p>
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col md:flex-row items-center gap-4">
-                                            <div className="text-center md:text-right mr-4">
-                                                <span className="text-2xl font-bold text-primary-color block">{candidate.votes || 0}</span>
-                                                <span className="text-xs text-muted-color uppercase tracking-wider">{t("admin.current_votes")}</span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-right">
+                                                <span className="text-xl font-bold text-primary-color">{candidate.votes || 0}</span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 bg-layer-1 rounded-lg p-1 border border-glass-border">
+                                            <div className="flex items-center gap-1 bg-layer-1 rounded-lg p-1 border border-glass-border">
                                                 <button
                                                     onClick={() => handleUpdateVote(candidate.id, "decrement")}
                                                     disabled={updating === candidate.id || (candidate.votes || 0) <= 0}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-red-500/10 text-red-400 disabled:opacity-30 transition-colors"
+                                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-500/10 text-red-400 disabled:opacity-30 transition-colors text-sm"
                                                     title="Subtract Vote"
                                                 >
                                                     -1
                                                 </button>
-                                                <div className="w-px h-6 bg-glass-border mx-1"></div>
+                                                <div className="w-px h-4 bg-glass-border"></div>
                                                 <button
                                                     onClick={() => handleUpdateVote(candidate.id, "increment")}
                                                     disabled={updating === candidate.id}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-green-500/10 text-green-400 disabled:opacity-30 transition-colors"
+                                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-green-500/10 text-green-400 disabled:opacity-30 transition-colors text-sm"
                                                     title="Add Vote"
                                                 >
                                                     +1
                                                 </button>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="number"
-                                                    placeholder="Set"
-                                                    className="w-20 px-3 py-2 rounded-lg bg-layer-1 border border-glass-border text-primary-color text-sm text-center focus:border-purple-500 focus:outline-none"
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            const val = parseInt((e.target as HTMLInputElement).value);
-                                                            if (!isNaN(val)) {
-                                                                handleUpdateVote(candidate.id, "set", val);
-                                                                (e.target as HTMLInputElement).value = '';
-                                                            }
+                                            <input
+                                                type="number"
+                                                placeholder="Set"
+                                                className="w-14 px-2 py-1.5 rounded-lg bg-layer-1 border border-glass-border text-primary-color text-sm text-center focus:border-purple-500 focus:outline-none"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        const val = parseInt((e.target as HTMLInputElement).value);
+                                                        if (!isNaN(val)) {
+                                                            handleUpdateVote(candidate.id, "set", val);
+                                                            (e.target as HTMLInputElement).value = '';
                                                         }
-                                                    }}
-                                                />
-                                            </div>
+                                                    }
+                                                }}
+                                            />
                                         </div>
                                     </div>
                                 ))}

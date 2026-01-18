@@ -21,6 +21,7 @@ interface Candidate {
 export default function ResultsPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [abstainVotes, setAbstainVotes] = useState(0);
+    const [spoiledVotes, setSpoiledVotes] = useState(0);
     const [loading, setLoading] = useState(true);
     const [totalVotes, setTotalVotes] = useState(0);
     const { t } = useLanguage();
@@ -33,6 +34,7 @@ export default function ResultsPage() {
         const settingsUnsubscribe = onSnapshot(doc(db, "settings", "config"), (docSnap) => {
             if (docSnap.exists()) {
                 setAbstainVotes(docSnap.data().abstain || 0);
+                setSpoiledVotes(docSnap.data().spoiled || 0);
             }
         });
 
@@ -55,11 +57,10 @@ export default function ResultsPage() {
         };
     }, []);
 
-    // Re-calculate total votes whenever candidates or abstainVotes change
     useEffect(() => {
         const candidateVotes = candidates.reduce((sum, c) => sum + (c.votes || 0), 0);
-        setTotalVotes(candidateVotes + abstainVotes);
-    }, [candidates, abstainVotes]);
+        setTotalVotes(candidateVotes + abstainVotes + spoiledVotes);
+    }, [candidates, abstainVotes, spoiledVotes]);
 
     return (
         <div className="min-h-screen transition-colors duration-300">
@@ -112,6 +113,11 @@ export default function ResultsPage() {
                             {/* Abstain Card */}
                             {!loading && (
                                 <AbstainCard count={abstainVotes} totalVotes={totalVotes} />
+                            )}
+
+                            {/* Spoiled Ballot Card */}
+                            {!loading && (
+                                <SpoiledCard count={spoiledVotes} totalVotes={totalVotes} />
                             )}
 
                             {candidates.length === 0 && (
@@ -239,6 +245,45 @@ function AbstainCard({ count, totalVotes }: { count: number; totalVotes: number 
                 <div className="h-2 bg-layer-2 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-secondary-color/30 rounded-full transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                    />
+                </div>
+                <p className="text-right text-xs text-muted-color mt-1">{percentage.toFixed(1)}%</p>
+            </div>
+        </div>
+    );
+}
+
+/* Spoiled Ballot Card (บัตรเสีย) */
+function SpoiledCard({ count, totalVotes }: { count: number; totalVotes: number }) {
+    const { t } = useLanguage();
+    const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
+
+    return (
+        <div className="glass-card rounded-2xl p-5 border-2 border-dashed border-red-500/30 animate-fadeInUp" style={{ animationDelay: '550ms' }}>
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+
+                <div className="flex-1">
+                    <p className="font-semibold text-primary-color">{t("results.spoiled")}</p>
+                    <p className="text-sm text-muted-color">Spoiled/Invalid ballots</p>
+                </div>
+
+                <div className="text-right">
+                    <p className="text-2xl font-bold text-red-400">{count}</p>
+                    <p className="text-xs text-muted-color">{t("results.votes")}</p>
+                </div>
+            </div>
+
+            {/* Progress Bar (Red tint) */}
+            <div className="mt-4">
+                <div className="h-2 bg-layer-2 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-red-500/30 rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                     />
                 </div>

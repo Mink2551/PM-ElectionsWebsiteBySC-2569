@@ -266,6 +266,12 @@ export default function AdminPage() {
                 >
                   🔔 Alerts
                 </a>
+                <a
+                  href="/admin/comments"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-semibold text-sm hover:shadow-lg hover:shadow-teal-500/30 transition-all"
+                >
+                  💬 Comments
+                </a>
               </div>
             </div>
 

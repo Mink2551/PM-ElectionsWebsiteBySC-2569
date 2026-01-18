@@ -7,6 +7,7 @@ export type AdminAction =
     | 'delete_candidate'
     | 'update_votes'
     | 'update_abstain'
+    | 'update_spoiled'
     | 'block_user'
     | 'unblock_user'
     | 'delete_user'
