@@ -351,7 +351,12 @@ export default function AdminUsersPage() {
                                             {filteredUsers.map((user) => (
                                                 <tr key={user.studentId} className={`${user.isBlocked ? 'bg-red-500/5' : ''} hover:bg-layer-1 transition-colors`}>
                                                     <td className="px-4 py-4">
-                                                        <span className="font-mono font-bold text-primary-color">{user.studentId}</span>
+                                                        <span className={`font-mono font-bold ${user.isBlocked
+                                                                ? 'text-red-400'
+                                                                : user.warningMessage
+                                                                    ? 'text-orange-400'
+                                                                    : 'text-primary-color'
+                                                            }`}>{user.studentId}</span>
                                                     </td>
                                                     <td className="px-4 py-4">
                                                         <span className="text-secondary-color">{user.nickname}</span>
