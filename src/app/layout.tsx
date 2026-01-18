@@ -7,6 +7,7 @@ import { UserProvider } from "@/shared/context/UserContext";
 import UserVerificationModal from "@/components/UserVerificationModal";
 import AlertPopup from "@/components/AlertPopup";
 import BlockedUserPopup from "@/components/BlockedUserPopup";
+import UserWarningPopup from "@/components/UserWarningPopup";
 import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
@@ -41,6 +42,7 @@ export default function RootLayout({
               {children}
               <UserVerificationModal />
               <BlockedUserPopup />
+              <UserWarningPopup />
               <AlertPopup />
               <Analytics />
             </UserProvider>

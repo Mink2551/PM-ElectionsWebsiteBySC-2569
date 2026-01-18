@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc } from "firebase/firestore";
 import Navbar from "@/features/navbar/navbar";
 import Footer from "@/features/footer/Footer";
 import AdminGuard from "@/components/AdminGuard";
@@ -25,6 +25,7 @@ interface User {
     isBlocked: boolean;
     blockReason?: string;
     isFocused?: boolean;
+    warningMessage?: string;
 }
 
 export default function AdminUsersPage() {
@@ -38,9 +39,16 @@ export default function AdminUsersPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [detailUser, setDetailUser] = useState<User | null>(null);
+    const [showWarningModal, setShowWarningModal] = useState(false);
+    const [warningUser, setWarningUser] = useState<User | null>(null);
+    const [warningMessage, setWarningMessage] = useState("");
+    const [quickTexts, setQuickTexts] = useState<string[]>([]);
+    const [newQuickText, setNewQuickText] = useState("");
+    const [showQuickTextManager, setShowQuickTextManager] = useState(false);
 
     useEffect(() => {
         fetchUsers();
+        fetchQuickTexts();
 
         // Auto-refresh every 5 seconds for real-time status updates
         const interval = setInterval(() => {
@@ -49,6 +57,42 @@ export default function AdminUsersPage() {
 
         return () => clearInterval(interval);
     }, []);
+
+    const fetchQuickTexts = async () => {
+        try {
+            const docRef = doc(db, "settings", "warningTemplates");
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                setQuickTexts(docSnap.data().templates || []);
+            }
+        } catch (error) {
+            console.error("Error fetching quick texts:", error);
+        }
+    };
+
+    const handleAddQuickText = async () => {
+        if (!newQuickText.trim()) return;
+        try {
+            const updated = [...quickTexts, newQuickText.trim()];
+            await setDoc(doc(db, "settings", "warningTemplates"), { templates: updated });
+            setQuickTexts(updated);
+            setNewQuickText("");
+        } catch (error) {
+            console.error("Error adding quick text:", error);
+            alert("Failed to add quick text");
+        }
+    };
+
+    const handleDeleteQuickText = async (index: number) => {
+        try {
+            const updated = quickTexts.filter((_, i) => i !== index);
+            await setDoc(doc(db, "settings", "warningTemplates"), { templates: updated });
+            setQuickTexts(updated);
+        } catch (error) {
+            console.error("Error deleting quick text:", error);
+            alert("Failed to delete quick text");
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -151,6 +195,56 @@ export default function AdminUsersPage() {
         } catch (error) {
             console.error("Error toggling focus:", error);
             alert("Failed to toggle focus");
+        }
+    };
+
+    const handleSetWarning = async (userId: string) => {
+        if (!warningMessage.trim()) {
+            alert("Please enter a warning message");
+            return;
+        }
+        try {
+            // Replace variables: <name> -> user's nickname
+            const targetUser = users.find(u => u.studentId === userId);
+            let processedMessage = warningMessage.trim();
+            if (targetUser) {
+                processedMessage = processedMessage.replace(/<name>/gi, targetUser.nickname);
+            }
+
+            await updateDoc(doc(db, "users", userId), {
+                warningMessage: processedMessage
+            });
+            setUsers(prev => prev.map(u =>
+                u.studentId === userId
+                    ? { ...u, warningMessage: processedMessage }
+                    : u
+            ));
+            setShowWarningModal(false);
+            setWarningMessage("");
+            setWarningUser(null);
+        } catch (error) {
+            console.error("Error setting warning:", error);
+            alert("Failed to set warning");
+        }
+    };
+
+    const handleClearWarning = async (userId: string) => {
+        try {
+            await updateDoc(doc(db, "users", userId), {
+                warningMessage: ""
+            });
+            setUsers(prev => prev.map(u =>
+                u.studentId === userId
+                    ? { ...u, warningMessage: "" }
+                    : u
+            ));
+            // Also update detailUser if it's the same user
+            if (detailUser?.studentId === userId) {
+                setDetailUser({ ...detailUser, warningMessage: "" });
+            }
+        } catch (error) {
+            console.error("Error clearing warning:", error);
+            alert("Failed to clear warning");
         }
     };
 
@@ -336,6 +430,20 @@ export default function AdminUsersPage() {
                                                                     Block
                                                                 </button>
                                                             )}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setWarningUser(user);
+                                                                    setWarningMessage(user.warningMessage || "");
+                                                                    setShowWarningModal(true);
+                                                                }}
+                                                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.warningMessage
+                                                                    ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
+                                                                    : 'bg-orange-500/10 text-orange-400 hover:bg-orange-500/20'
+                                                                    }`}
+                                                                title={user.warningMessage ? `Warning: ${user.warningMessage}` : "Set warning"}
+                                                            >
+                                                                {user.warningMessage ? '⚠️ Warn' : 'Warn'}
+                                                            </button>
                                                             <button
                                                                 onClick={() => handleDelete(user.studentId)}
                                                                 className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-colors"
@@ -546,6 +654,130 @@ export default function AdminUsersPage() {
                             >
                                 Close
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Warning Modal */}
+                {showWarningModal && warningUser && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowWarningModal(false)} />
+                        <div className="relative w-full max-w-md glass-card rounded-2xl p-8">
+                            <h3 className="text-xl font-bold text-primary-color mb-4 flex items-center gap-2">
+                                ⚠️ {language === "en" ? "Set Warning for" : "ตั้งค่าคำเตือนสำหรับ"}: {warningUser.nickname}
+                            </h3>
+                            <p className="text-secondary-color mb-4 text-sm">
+                                {language === "en"
+                                    ? "This warning will be shown as a popup when the user opens the website."
+                                    : "คำเตือนนี้จะแสดงเป็น popup เมื่อผู้ใช้เปิดเว็บไซต์"}
+                            </p>
+
+                            {/* Quick Text Presets */}
+                            <div className="mb-3">
+                                <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs text-muted-color">{language === "en" ? "Quick Text:" : "ข้อความด่วน:"}</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowQuickTextManager(!showQuickTextManager)}
+                                        className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                                    >
+                                        {showQuickTextManager ? "✕ Close" : "+ Manage"}
+                                    </button>
+                                </div>
+
+                                {/* Add New Quick Text */}
+                                {showQuickTextManager && (
+                                    <div className="flex gap-2 mb-3">
+                                        <input
+                                            type="text"
+                                            value={newQuickText}
+                                            onChange={(e) => setNewQuickText(e.target.value)}
+                                            placeholder={language === "en" ? "Add new quick text..." : "เพิ่มข้อความด่วนใหม่..."}
+                                            className="flex-1 px-3 py-2 rounded-lg bg-layer-1 border border-glass-border text-primary-color text-xs placeholder-muted-color focus:border-purple-500 focus:outline-none"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleAddQuickText();
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleAddQuickText}
+                                            className="px-3 py-2 rounded-lg bg-purple-500 text-white text-xs font-medium hover:bg-purple-600 transition-colors"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Quick Text Buttons */}
+                                <div className="flex flex-wrap gap-2">
+                                    {quickTexts.length === 0 ? (
+                                        <p className="text-xs text-muted-color italic">
+                                            {language === "en" ? "No quick texts yet. Click 'Manage' to add." : "ยังไม่มีข้อความด่วน กด 'Manage' เพื่อเพิ่ม"}
+                                        </p>
+                                    ) : (
+                                        quickTexts.map((text, index) => (
+                                            <div key={index} className="flex items-center gap-1 group">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setWarningMessage(text)}
+                                                    className="px-3 py-1.5 rounded-lg bg-layer-1 border border-glass-border text-xs text-secondary-color hover:bg-layer-2 hover:text-primary-color transition-colors max-w-[200px] truncate"
+                                                    title={text}
+                                                >
+                                                    {text.length > 20 ? text.substring(0, 20) + "..." : text}
+                                                </button>
+                                                {showQuickTextManager && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteQuickText(index)}
+                                                        className="p-1 rounded text-red-400 hover:bg-red-500/20 transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+
+                            <textarea
+                                value={warningMessage}
+                                onChange={(e) => setWarningMessage(e.target.value)}
+                                placeholder={language === "en" ? "Enter warning message..." : "ใส่ข้อความเตือน..."}
+                                className="w-full px-4 py-3 rounded-xl bg-layer-1 border border-glass-border text-primary-color placeholder-muted-color focus:border-orange-500 focus:outline-none resize-none h-32 mb-4"
+                            />
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => handleSetWarning(warningUser.studentId)}
+                                    className="flex-1 py-3 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors"
+                                >
+                                    {language === "en" ? "Set Warning" : "ตั้งค่าคำเตือน"}
+                                </button>
+                                {warningUser.warningMessage && (
+                                    <button
+                                        onClick={() => {
+                                            handleClearWarning(warningUser.studentId);
+                                            setShowWarningModal(false);
+                                            setWarningUser(null);
+                                            setWarningMessage("");
+                                        }}
+                                        className="flex-1 py-3 rounded-xl bg-green-500/20 text-green-400 font-semibold hover:bg-green-500/30 transition-colors"
+                                    >
+                                        {language === "en" ? "Clear Warning" : "ล้างคำเตือน"}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        setShowWarningModal(false);
+                                        setWarningUser(null);
+                                        setWarningMessage("");
+                                    }}
+                                    className="flex-1 py-3 rounded-xl border border-glass-border text-secondary-color hover:bg-layer-1 transition-colors"
+                                >
+                                    {language === "en" ? "Cancel" : "ยกเลิก"}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
