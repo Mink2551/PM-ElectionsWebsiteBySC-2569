@@ -98,33 +98,36 @@ export default function ResultsPage() {
                         </div>
                     )}
 
-                    {/* Results List */}
+                    {/* Results List - Candidates on Left, Abstain/Spoiled on Right */}
                     {!loading && (
-                        <div className="space-y-4">
-                            {candidates.map((candidate, index) => (
-                                <ResultCard
-                                    key={candidate.id}
-                                    candidate={candidate}
-                                    rank={index + 1}
-                                    totalVotes={totalVotes}
-                                />
-                            ))}
+                        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+                            {/* Candidates Column */}
+                            <div className="space-y-4">
+                                {candidates.map((candidate, index) => (
+                                    <ResultCard
+                                        key={candidate.id}
+                                        candidate={candidate}
+                                        rank={index + 1}
+                                        totalVotes={totalVotes}
+                                    />
+                                ))}
 
-                            {/* Abstain Card */}
-                            {!loading && (
-                                <AbstainCard count={abstainVotes} totalVotes={totalVotes} />
-                            )}
+                                {candidates.length === 0 && (
+                                    <div className="glass-card rounded-2xl p-12 text-center">
+                                        <p className="text-muted-color text-lg">{t("no_candidates")}</p>
+                                    </div>
+                                )}
+                            </div>
 
-                            {/* Spoiled Ballot Card */}
-                            {!loading && (
-                                <SpoiledCard count={spoiledVotes} totalVotes={totalVotes} />
-                            )}
-
-                            {candidates.length === 0 && (
-                                <div className="glass-card rounded-2xl p-12 text-center">
-                                    <p className="text-muted-color text-lg">{t("no_candidates")}</p>
+                            {/* Abstain & Spoiled Cards - Right Column */}
+                            <div className="flex flex-col gap-4 h-full">
+                                <div className="flex-1">
+                                    <AbstainCard count={abstainVotes} totalVotes={totalVotes} />
                                 </div>
-                            )}
+                                <div className="flex-1">
+                                    <SpoiledCard count={spoiledVotes} totalVotes={totalVotes} />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -161,7 +164,7 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
     };
 
     return (
-        <div className="glass-card rounded-2xl p-5 card-hover animate-fadeInUp" style={{ animationDelay: `${rank * 50}ms` }}>
+        <div className="glass-card rounded-2xl p-3 card-hover animate-fadeInUp" style={{ animationDelay: `${rank * 50}ms` }}>
             <div className="flex items-center gap-4">
                 {/* Rank Badge */}
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getRankStyle()} flex items-center justify-center font-bold ${rank <= 3 ? 'text-white' : 'text-primary-color'}`}>
@@ -202,7 +205,7 @@ function ResultCard({ candidate, rank, totalVotes }: { candidate: Candidate; ran
             </div>
 
             {/* Progress Bar */}
-            <div className="mt-4">
+            <div className="mt-2">
                 <div className="h-2 bg-layer-2 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-accent-gradient rounded-full transition-all duration-500"
@@ -221,34 +224,37 @@ function AbstainCard({ count, totalVotes }: { count: number; totalVotes: number 
     const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
 
     return (
-        <div className="glass-card rounded-2xl p-5 border-2 border-dashed border-glass-border animate-fadeInUp" style={{ animationDelay: '500ms' }}>
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-layer-2 flex items-center justify-center text-secondary-color">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="glass-card rounded-2xl p-4 border-2 border-dashed border-glass-border animate-fadeInUp h-full flex flex-col" style={{ animationDelay: '500ms' }}>
+            {/* Icon */}
+            <div className="flex justify-center mb-3">
+                <div className="w-12 h-12 rounded-xl bg-layer-2 flex items-center justify-center text-secondary-color">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                     </svg>
                 </div>
-
-                <div className="flex-1">
-                    <p className="font-semibold text-primary-color">{t("results.abstain")}</p>
-                    <p className="text-sm text-muted-color">Global non-voting delegates</p>
-                </div>
-
-                <div className="text-right">
-                    <p className="text-2xl font-bold text-secondary-color">{count}</p>
-                    <p className="text-xs text-muted-color">{t("results.votes")}</p>
-                </div>
             </div>
 
-            {/* Progress Bar (Subtle) */}
-            <div className="mt-4">
+            {/* Text */}
+            <div className="text-center mb-3">
+                <p className="font-semibold text-primary-color">{t("results.abstain")}</p>
+                <p className="text-xs text-muted-color">Non-voting</p>
+            </div>
+
+            {/* Vote Count */}
+            <div className="text-center flex-1 flex flex-col justify-center">
+                <p className="text-3xl font-bold text-secondary-color">{count}</p>
+                <p className="text-xs text-muted-color">{t("results.votes")}</p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-auto pt-3">
                 <div className="h-2 bg-layer-2 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-secondary-color/30 rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                     />
                 </div>
-                <p className="text-right text-xs text-muted-color mt-1">{percentage.toFixed(1)}%</p>
+                <p className="text-center text-xs text-muted-color mt-1">{percentage.toFixed(1)}%</p>
             </div>
         </div>
     );
@@ -260,34 +266,37 @@ function SpoiledCard({ count, totalVotes }: { count: number; totalVotes: number 
     const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
 
     return (
-        <div className="glass-card rounded-2xl p-5 border-2 border-dashed border-red-500/30 animate-fadeInUp" style={{ animationDelay: '550ms' }}>
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="glass-card rounded-2xl p-4 border-2 border-dashed border-red-500/30 animate-fadeInUp h-full flex flex-col" style={{ animationDelay: '550ms' }}>
+            {/* Icon */}
+            <div className="flex justify-center mb-3">
+                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
-
-                <div className="flex-1">
-                    <p className="font-semibold text-primary-color">{t("results.spoiled")}</p>
-                    <p className="text-sm text-muted-color">Spoiled/Invalid ballots</p>
-                </div>
-
-                <div className="text-right">
-                    <p className="text-2xl font-bold text-red-400">{count}</p>
-                    <p className="text-xs text-muted-color">{t("results.votes")}</p>
-                </div>
             </div>
 
-            {/* Progress Bar (Red tint) */}
-            <div className="mt-4">
+            {/* Text */}
+            <div className="text-center mb-3">
+                <p className="font-semibold text-primary-color">{t("results.spoiled")}</p>
+                <p className="text-xs text-muted-color">Invalid ballots</p>
+            </div>
+
+            {/* Vote Count */}
+            <div className="text-center flex-1 flex flex-col justify-center">
+                <p className="text-3xl font-bold text-red-400">{count}</p>
+                <p className="text-xs text-muted-color">{t("results.votes")}</p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-auto pt-3">
                 <div className="h-2 bg-layer-2 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-red-500/30 rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                     />
                 </div>
-                <p className="text-right text-xs text-muted-color mt-1">{percentage.toFixed(1)}%</p>
+                <p className="text-center text-xs text-muted-color mt-1">{percentage.toFixed(1)}%</p>
             </div>
         </div>
     );
