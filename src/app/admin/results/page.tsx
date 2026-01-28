@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, doc } from "firebase/firestore";
+import { collection, onSnapshot, doc, query } from "firebase/firestore";
 
 interface Candidate {
     id: string;
-    number?: number;
+    candidateNumber?: number;
     votes: number;
 }
 
@@ -16,7 +16,8 @@ export default function AdminResultsPage() {
     const [spoiledVotes, setSpoiledVotes] = useState(0);
 
     useEffect(() => {
-        const q = collection(db, "candidates");
+        // Real-time listener for candidates (matching /results pattern)
+        const q = query(collection(db, "candidates"));
 
         const settingsUnsubscribe = onSnapshot(doc(db, "settings", "config"), (docSnap) => {
             if (docSnap.exists()) {
@@ -32,7 +33,7 @@ export default function AdminResultsPage() {
             })) as Candidate[];
 
             // Sort by candidate number (fixed position)
-            data.sort((a, b) => (a.number || 0) - (b.number || 0));
+            data.sort((a, b) => (a.candidateNumber || 0) - (b.candidateNumber || 0));
             setCandidates(data);
         });
 
@@ -44,14 +45,20 @@ export default function AdminResultsPage() {
 
     return (
         <div className="min-h-screen bg-green-600 p-8 flex items-center justify-center">
-            <div className="w-full max-w-6xl">
-                {/* Candidates - Fixed Grid */}
-                <div className="grid grid-cols-5 gap-8 mb-12">
+            <div className="w-full max-w-4xl">
+                {/* Candidates - Vertical Stack */}
+                <div className="flex flex-col gap-4 mb-8">
                     {[1, 2, 3, 4, 5].map((num) => {
-                        const candidate = candidates.find(c => c.number === num);
+                        const candidate = candidates.find(c => c.candidateNumber === num);
                         return (
-                            <div key={num} className="text-center">
-                                <div className="text-8xl md:text-9xl text-red-600 font-bold">
+                            <div key={num} className="flex items-center justify-center">
+                                <div
+                                    className="text-8xl md:text-9xl text-red-600 font-bold text-center"
+                                    style={{
+                                        fontVariantNumeric: 'tabular-nums',
+                                        minWidth: '4ch'
+                                    }}
+                                >
                                     {candidate?.votes || 0}
                                 </div>
                             </div>
@@ -59,15 +66,27 @@ export default function AdminResultsPage() {
                     })}
                 </div>
 
-                {/* Abstain & Spoiled - Fixed Grid */}
+                {/* Abstain & Spoiled - Horizontal */}
                 <div className="grid grid-cols-2 gap-8">
-                    <div className="text-center">
-                        <div className="text-7xl md:text-8xl font-bold text-white">
+                    <div className="flex items-center justify-center">
+                        <div
+                            className="text-7xl md:text-8xl font-bold text-white text-center"
+                            style={{
+                                fontVariantNumeric: 'tabular-nums',
+                                minWidth: '4ch'
+                            }}
+                        >
                             {abstainVotes}
                         </div>
                     </div>
-                    <div className="text-center">
-                        <div className="text-7xl md:text-8xl font-bold text-white">
+                    <div className="flex items-center justify-center">
+                        <div
+                            className="text-7xl md:text-8xl font-bold text-white text-center"
+                            style={{
+                                fontVariantNumeric: 'tabular-nums',
+                                minWidth: '4ch'
+                            }}
+                        >
                             {spoiledVotes}
                         </div>
                     </div>

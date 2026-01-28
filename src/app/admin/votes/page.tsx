@@ -14,6 +14,7 @@ interface Candidate {
     firstname: string;
     lastname: string;
     nickname: string;
+    candidateNumber?: number;
     votes: number;
 }
 
@@ -53,8 +54,8 @@ export default function VotesAdminPage() {
                 ...doc.data(),
             })) as Candidate[];
 
-            // Sort by votes descending
-            data.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            // Sort by candidate number ascending
+            data.sort((a, b) => (a.candidateNumber || 999) - (b.candidateNumber || 999));
 
             setCandidates(data);
         } catch (error) {
