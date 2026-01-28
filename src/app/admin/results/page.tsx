@@ -51,7 +51,7 @@ export default function AdminResultsPage() {
                         const candidate = candidates.find(c => c.number === num);
                         return (
                             <div key={num} className="text-center">
-                                <div className="text-8xl md:text-9xl font-bold text-white">
+                                <div className="text-8xl md:text-9xl text-red-600 font-bold">
                                     {candidate?.votes || 0}
                                 </div>
                             </div>
